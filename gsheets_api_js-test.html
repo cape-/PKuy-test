@@ -1,18 +1,53 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Google Sheets API Quickstart</title>
     <meta charset="utf-8" />
+    <title>Google Sheets API Quickstart</title>
   </head>
   <body>
     <p>Google Sheets API Quickstart</p>
 
-    <!--Add buttons to initiate auth sequence and sign out-->
-    <button id="authorize_button" style="display: none;">Authorize</button>
-    <button id="signout_button" style="display: none;">Sign Out</button>
+    <!--Add button3 s to initiate auth sequence and sign out-->
+    <button id="authorize_button" style="display: none;">Autorizar y Conectar a PKuy-test</button>
+    <button id="signout_button" style="display: none;">Desconectar</button>
 
-    <pre id="content" style="white-space: pre-wrap;"></pre>
+    <pre id="content"></pre>
 
+    <script type="text/javascript">
+    class maestroClientes{
+      constructor(data){
+        this.recordSet = data;
+        console.log('New maestroClientes OK >')
+        console.log(this.recordSet)
+        console.log('New maestroClientes OK <')
+      }
+      getByCliID(queryCliID){
+        console.log('getByCliID >')
+        console.log(this.recordSet);
+        // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
+        // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
+        // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
+        // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
+        this.recordSet.forEach(element => console.log(element));
+        this.recordSet.forEach(function(element){
+          // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
+          // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
+          // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
+          // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
+          console.log('ele');
+          console.log(element);
+        });
+        console.log('getByCliID <')
+        // for(var i=0; i<this.recordSet.length; i++){
+        //   console.log(this.recordSet[i]);
+        //   if (this.recordSet[i].cliID == queryCliID)
+        //     return this.recordSet[i];
+        // }
+        // return null;
+      }
+
+    }
+    </script>
     <script type="text/javascript">
       // Client ID and API key from the Developer Console
       var CLIENT_ID = '299062314670-le1i5q22g34g7pia51rg0979pgjsri03.apps.googleusercontent.com';
@@ -54,7 +89,7 @@
           authorizeButton.onclick = handleAuthClick;
           signoutButton.onclick = handleSignoutClick;
         }, function(error) {
-          appendPre(JSON.stringify(error, null, 2));
+          divContentNewP(JSON.stringify(error, null, 2));
         });
       }
 
@@ -66,7 +101,11 @@
         if (isSignedIn) {
           authorizeButton.style.display = 'none';
           signoutButton.style.display = 'block';
-          listMajors();
+          const cli_01 = new maestroClientes(loadEntireTable('cli_01'));
+          const ptodespacho_01 = loadEntireTable('ptodespacho_01');
+          console.log (cli_01);
+          const cli_22003 = cli_01.getByCliID('22003'); 
+          console.log (cli_22003);
         } else {
           authorizeButton.style.display = 'block';
           signoutButton.style.display = 'none';
@@ -93,39 +132,53 @@
        *
        * @param {string} message Text to be placed in pre element.
        */
-      function appendPre(message) {
-        var pre = document.getElementById('content');
-        var textContent = document.createTextNode(message + '\n');
-        pre.appendChild(textContent);
+      function divContentNewP(message) {
+        var div = document.getElementById('content');
+        var p = document.createElement('p');
+        var textContent = document.createTextNode(message);
+        p.appendChild(textContent);
+        div.appendChild(p);
       }
 
       /**
        * Print the names and majors of students in a sample spreadsheet:
        * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
-       PKuy_1_0-test
-       * https://docs.google.com/spreadsheets/d/1O8y6zq7qmCtiWmg3Sj4VqTXlO7NQHorNWZjO3oSRlDg/edit
-*/
-      function listMajors() {
+       */
+       /*
+         PKuy_1_0-test
+         https://docs.google.com/spreadsheets/d/1O8y6zq7qmCtiWmg3Sj4VqTXlO7NQHorNWZjO3oSRlDg/edit
+       */
+      function loadEntireTable(tableName) {
+        var returnTable = new Array();
+        
         gapi.client.sheets.spreadsheets.values.get({
           spreadsheetId: '1O8y6zq7qmCtiWmg3Sj4VqTXlO7NQHorNWZjO3oSRlDg',
-          range: 'cli_01!A1:A100',
+          range: tableName + '!A1:ZZ100000',
+          majorDimension: 'ROWS'
         }).then(function(response) {
           var range = response.result;
+          // Si tiene datos
           if (range.values.length > 0) {
-            appendPre('Name, Major:');
-            for (i = 0; i < range.values.length; i++) {
+            // Puntero a Cabecera
+            var cab = range.values[0];
+            // Recorrer registros
+            for (i = 1; i < range.values.length; i++) {
               var row = range.values[i];
-              // Print columns A and E, which correspond to indices 0 and 4.
-              appendPre(row[0] + ', ' + row[4]);
+              returnTable[i] = new Object();
+              // divContentNewP(JSON.stringify(returnTable));
+              for (j = 0; j < row.length; j++){
+                returnTable[i][cab[j]] = row[j];
+              }
             }
           } else {
-            appendPre('No data found.');
+            divContentNewP('No data found.');
           }
         }, function(response) {
-          appendPre('Error: ' + response.result.error.message);
+          divContentNewP('Error: ' + response.result.error.message);
         });
+        return returnTable;
       }
-
+      
     </script>
 
     <script async defer src="https://apis.google.com/js/api.js"
