@@ -14,39 +14,60 @@
     <pre id="content"></pre>
 
     <script type="text/javascript">
-    class maestroClientes{
-      constructor(data){
-        this.recordSet = data;
-        console.log('New maestroClientes OK >')
-        console.log(this.recordSet)
-        console.log('New maestroClientes OK <')
-      }
-      getByCliID(queryCliID){
-        console.log('getByCliID >')
-        console.log(this.recordSet);
-        // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
-        // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
-        // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
-        // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
-        this.recordSet.forEach(element => console.log(element));
-        this.recordSet.forEach(function(element){
-          // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
-          // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
-          // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
-          // >>>>>>>>>>>>>>>>>>>>> S E G U I R <<<<<<<<<<<<<<<<
-          console.log('ele');
-          console.log(element);
-        });
-        console.log('getByCliID <')
-        // for(var i=0; i<this.recordSet.length; i++){
-        //   console.log(this.recordSet[i]);
-        //   if (this.recordSet[i].cliID == queryCliID)
-        //     return this.recordSet[i];
-        // }
-        // return null;
+      /* CLASE CLIENTE */
+      class cl_cliente{
+        nombre;
+        apellido;
+        edad;
+        es_ML;
+
+        constructor(dataIn){
+          var attrib;
+          for( attrib in dataIn ){
+            this[attrib] = dataIn[attrib];
+          }
+        }
+        nombreMostrar(){
+          return this.apellido + ' ' + this.nombre;
+        }
+        getPedidosAbiertos(){
+        }
+        getPedidosCerrados(){
+        }
       }
 
-    }
+      /* CLASE MAESTRO DE CLIENTES */
+      class cl_maestroClientes{
+            constructor(data){
+            this.recordSet = new Array();
+            var cliente_data;
+            for( cliente_data in data ){
+            this.recordSet.push(new cl_cliente(data[cliente_data]));
+            }
+            }
+
+            getByApellido(queryApellido){
+          for(var i = 0; i < this.recordSet.length; i++)
+          {
+            if (this.recordSet[i] == undefined) continue;
+            var cliente = new cl_cliente(this.recordSet[i]);
+            if (cliente.apellido == queryApellido)
+              return cliente;
+              }
+          return null;
+            }
+
+            getByEdad(queryEdad){
+          for(var i = 0; i < this.recordSet.length; i++)
+          {
+            if (this.recordSet[i] == undefined) continue;
+            var cliente = new cl_cliente(this.recordSet[i]);
+            if (cliente.edad == queryEdad)
+              return cliente;
+              }
+          return null;
+            }
+      }
     </script>
     <script type="text/javascript">
       // Client ID and API key from the Developer Console
