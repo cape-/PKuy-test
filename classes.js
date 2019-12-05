@@ -1,10 +1,3 @@
-
-var PkuyApp = {
-  ver: '1.0',
-  author: 'laucape@gmail.com',
-  tipos:{}
-};
-
 class PKuyObj_base {
   constructor() {
   }
