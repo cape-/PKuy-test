@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html ng-app="pkuyApp">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="manifest" href="/pkuy-manifest.json" />
+  <link rel="shortcut icon" type="image/png" href="/pkuy-icon-1x.png?v=2" />
+  <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+  <script src="https://static.mlstatic.com/org-img/sdk/mercadolibre-1.0.4.js"></script>
+  <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script> -->
+  <title>PKuy App - MeLi API Tests</title>
+</head>
+
+<body ng-controller="mainController">
+  <h1>PKuy 1.0</h1>
+  <p>Mercado Libre API - tests</p>
+  <ul>
+    <li ng-repeat="curr in currencies"><span>{{curr.id}}</span> {{curr.description}}</li>
+  </ul>
+  <hr>
+  <p>{{me}}</p>
+  <hr>
+  <ul>
+    <li ng-repeat="property in me"><span>{{property}}</span></li>
+  </ul>
+  <table>
+    <thead>
+      <th></th>
+      <th>Producto</th>
+      <th>Precio</th>
+      <th>Cant.Disp/Cant.Vend</th>
+      <th>Ubicación</th>
+      <th>Envío Gratis</th>
+    </thead>
+    <tbody>
+      <tr ng-repeat="producto in targetSeller.results">
+        <td>
+          <img src="{{ producto.thumbnail }}" alt="{{ producto.title }}">
+        </td>
+        <td>
+          <a href="{{ producto.permalink }}">{{ producto.title }}</a>
+        </td>
+        <td>
+          ${{ producto.price }} ({{ producto.currency_id }})
+        </td>
+        <td>
+          {{ producto.available_quantity }}/{{ producto.sold_quantity }}
+        </td>
+        <td>
+          {{ producto.address.city_name }}, {{ producto.address.state_name }}
+        </td>
+        <td>
+          Envío Grátis: {{ producto.shipping.free_shipping }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script type="text/javascript">
+    var PkuyApp = {
+      ml_client_id: 2996817738367875
+    }
+    function meliLoaded() {
+      PkuyApp.ng = angular.module('pkuyApp', []);
+      PkuyApp.ng.controller('mainController', function ($scope) {
+        MELI.init({
+          client_id: PkuyApp.ml_client_id
+        });
+        MELI.getLoginStatus(function (status) {
+          if (status.state !== 'AUTHORIZED') {
+            MELI.login(meliLogged($scope));
+          } else {
+            meliLogged($scope);
+          }
+        });
+      });
+    }
+    function meliLogged($scope) {
+      PkuyApp.mlData = new Object();
+      if (PkuyApp.token = MELI.getToken()) {
+        // meliToConsole("/users/me");
+        // meliToConsole("/sites/MLA/search?nickname=" + "PACHA-KUYUY"); // id: 146925020 / nickname: "PACHA-KUYUY"
+        // meliToConsole("/orders/search?seller=" + 146925020); // id: 146925020 / nickname: "PACHA-KUYUY"
+        meliGet("/sites/MLA/search?nickname=" + "PACHA-KUYUY", function (data) {
+          PkuyApp.mlData.targetSeller = $scope.targetSeller = data[2];
+          PkuyApp.mlData.targetSellerObj = data;
+          $scope.$apply()
+        })
+        meliGet("/orders/search/recent?seller=" + 146925020, function (data) {
+          PkuyApp.mlData.recentOrders = $scope.recentOrders = data[2];
+          $scope.$apply()
+        })
+        meliGet("/currencies", function (data) {
+          PkuyApp.mlData.currencies = $scope.currencies = data[2];
+          $scope.$apply()
+        })
+        meliGet("/users/me", function (data) {
+          PkuyApp.mlData.me = $scope.me = data[2];
+          $scope.$apply()
+        });
+        // $scope.$apply();
+        // $scope.mlData.currencies = meliGet("/currencies");
+        // meliToConsole("/sites/MLA/listing_types");
+        // meliToConsole("/sites/MLA/categories");
+        // meliToConsole("/categories/MLA407134");
+        // meliToConsole("/categories/MLA407134/attributes");
+        // meliToConsole("/currencies");
+        // meliToConsole("/currencies/ARS");
+        // meliToConsole("/currencies/USD");
+        // meliToConsole("/currency_conversions/search?from=ARS&to=USD");
+        // meliToConsole("/currency_conversions/search?from=USD&to=ARS");
+      }
+    }
+    function meliToConsole(what) {
+      MELI.get(what, {}, function (data) {
+        console.log(what + ' : ');
+        console.log(data[2]);
+      });
+    }
+    function meliGet(what, callback) {
+      console.log('meliGet ' + what);
+      MELI.get(what, {}, callback);
+    }
+    meliLoaded();
+  </script>
+</body>
+
+</html>

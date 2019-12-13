@@ -207,11 +207,29 @@ function loadUserData(callback) {
   });
 }
 
-function BORRAR_listarContactos(start, end) {
-  if (start==undefined) start = 0;
-  if (end==undefined || end > PkuyApp.contactos.length) end = PkuyApp.contactos.length;
+function listarContactos(start, end) {
+  if (start == undefined) start = 0;
+  if (end == undefined || end > PkuyApp.contactos.length) end = PkuyApp.contactos.length;
+  let intermediateDiv = document.createElement('div');
   for (let i = start; i < end; i++) {
-    if (PkuyApp.contactos[i].names !== undefined && PkuyApp.contactos[i].names[0].displayName !== undefined)
+    if (PkuyApp.contactos[i].names !== undefined && PkuyApp.contactos[i].names[0].displayName !== undefined) {
       console.log(i + '/' + PkuyApp.contactos[i].names[0].displayName);
+      let newDiv;
+      newDiv = document.createElement('div');
+      newDiv.appendChild(document.createTextNode(i + ''));
+      newDiv.appendChild(document.createElement('br'));
+      newDiv.appendChild(document.createTextNode('' + PkuyApp.contactos[i].names[0].displayName));
+      newDiv.setAttribute("class", "contacto")
+      if (i % 3)
+        newDiv.setAttribute("style", "background-color: darkcyan;")
+      else
+        newDiv.setAttribute("style", "background-color: coral;")
+
+      intermediateDiv.appendChild(newDiv);
+    }
   }
+
+  intermediateDiv.setAttribute("style", "width: max-content;")
+  contentDiv = document.getElementById('content');
+  contentDiv.appendChild(intermediateDiv);
 }
