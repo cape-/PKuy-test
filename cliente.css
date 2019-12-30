@@ -1,0 +1,30 @@
+md-icon.contacto-icon {
+    color: #6B4;
+    font-size: 48px;
+    height: auto;
+    width: auto
+}
+
+md-icon.cliente-icon {
+    color: #FB8C00;
+    font-size: 48px;
+    height: auto;
+    width: auto
+}
+
+md-bottom-sheet {
+    background-color: beige;
+    max-height: 50px;
+}
+
+md-bottom-sheet:hover {
+    max-height: 300px;
+}
+
+div.consolaContainer {
+    max-height: 200px;
+    overflow: auto;
+    flex: 100;
+    padding: 0 20px;
+    color: deeppink;
+}

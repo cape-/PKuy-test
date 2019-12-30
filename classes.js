@@ -1,4 +1,7 @@
 class PKuyObj_base {
+  rowRange;
+  TS;
+  usuario;
   constructor() {
   }
   direccion() {
@@ -21,6 +24,7 @@ class cl_cliente extends PKuyObj_base {
   dirID;
   ptoDespachoID_default;
   medioPago_default;
+  resourceName;
   TS;
   usuario;
 
@@ -63,6 +67,7 @@ class cl_pedido extends PKuyObj_base {
   implicaMovimiento;
   borrado;
   pagado;
+  cbtePago;
   preparado;
   entregado;
   tiempoRestante;
@@ -78,6 +83,27 @@ class cl_pedido extends PKuyObj_base {
       this[attrib] = dataIn[attrib];
     }
     this.key = this.ordID + this.ordPos;
+    // if (this.TS <<< Seguir con inicializacion
+  }
+  agregarProducto(cbtePago){
+    // crear posición
+    // 
+    // cambiar status
+  }
+  
+  quitarProducto(cbtePago){
+
+  }
+
+  confirmarPago(cbtePago){
+    // asociar comprobante
+    // cambiar status
+  }
+
+  confirmar(){
+    // generar entrega
+    // reservar stock (generar mov.material)
+    // cambiar status
   }
 }
 
@@ -141,7 +167,7 @@ class cl_producto extends PKuyObj_base {
   descripcion;
   prodID_modelo;
   esModelo;
-  cantPresentación;
+  cantPresentacion;
   UM;
   peso;
   mlUrl;
@@ -299,7 +325,7 @@ class cl_direccion {
   dirID;
   dirID_modelo;
   tel;
-  mail;
+  email;
   dirCalle;
   dirNum;
   dirPiso;

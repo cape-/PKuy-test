@@ -38,14 +38,13 @@
   <!--Add button3 s to initiate auth sequence and sign out-->
   <button id="authorize_button" style="display: none;">Autorizar y Conectar a PKuy-test</button>
   <button id="signout_button" style="display: none;">Desconectar</button>
-  <button id="listarContactos_button" onclick="listarContactos()">Cargar Contactos</button>
+  <button id="listarContactos_button" onclick="PkuyApp.listarContactos()">Cargar Contactos</button>
 
   <div id="content"></div>
-
+  
+  <script src="https://apis.google.com/js/api.js"></script>
   <script type="text/javascript" src="classes.js"></script>
   <script type="text/javascript" src="PKuy.js"></script>
-  <script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()"
-    onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
 </body>
 
 </html>

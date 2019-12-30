@@ -1,0 +1,75 @@
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="/pkuy-manifest.json" />
+    <link rel="shortcut icon" type="image/png" href="/pkuy-icon-1x.png?v=2" />
+    <!-- Angular Material style sheet -->
+    <link rel="stylesheet"
+        href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
+    <link rel="stylesheet" href="cliente.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+
+<body ng-app="PkuyApp" ng-controller="cliente" ng-cloak>
+    <div class="md-padding" id="popupContainer">
+        <md-menu md-offset="0 40" ng-repeat="menu in appMenu">
+            <!-- Trigger element is a md-button with an icon -->
+            <md-button ng-click="$mdMenu.open($event)">
+                {{ menu.titulo }}
+            </md-button>
+            <md-menu-content>
+                <md-menu-item ng-repeat="entrada in menu.entradas">
+                    <md-button ng-click="entrada.do()">{{entrada.titulo}}</md-button>
+                </md-menu-item>
+            </md-menu-content>
+        </md-menu>
+
+        <div class="dialog-demo-content" layout="row" layout-wrap layout-margin layout-align="center">
+            <md-button class="md-primary md-raised" ng-click="showPrompt($event)">
+                Inicio
+            </md-button>
+            <md-button class="md-primary md-raised" ng-click="showListadoClientes($event)">
+                Listado de Clientes
+            </md-button>
+            <md-button class="md-primary md-raised" ng-click="showTabDialog($event)">
+                Tab Dialog
+            </md-button>
+        </div>
+        <div flex="100">
+            <span flex></span>
+            <md-progress-circular ng-disabled="!pkuyLoading" md-diameter="96"></md-progress-circular>
+            <span flex></span>
+        </div>
+    </div>
+    <!-- <button id="authorize_button" onclick="PkuyApp.handleAuthClick()">Autorizar y Conectar a PKuy-test</button>
+    <button id="signout_button">Desconectar</button>
+    <button id="listarContactos_button" onclick="PkuyApp.listarContactos()">Cargar Contactos</button> -->
+    <div class="bottom-sheet-demo inset" layout="row" layout-sm="column" layout-align="center">
+        <md-button flex="50" class="md-primary md-raised" ng-click="showConsola()">CONSOLA</md-button>
+    </div>
+    
+    <!-- Angular Material requires Angular.js Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-messages.min.js"></script>
+
+    <!-- Angular Material Library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.js"></script>
+
+    <!-- Google API Library -->
+    <script src="https://apis.google.com/js/api.js"></script>
+
+    <!-- PkuyCore  -->
+    <script src="classes.js"></script>
+    <script src="PKuy.js"></script>
+
+    <!-- This APP  -->
+    <script src="cliente.js"></script>
+
+</body>
+
+</html>
