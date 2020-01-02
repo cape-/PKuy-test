@@ -326,6 +326,69 @@
     };
     console.error = console.debug = console.info = console.log;
   };
+  
+  PkuyApp.updateStockDiario = function () {
+    // 1. Get stock corriente (tabla stock_01)
+    // 2. Sumarizar por Producto/Depósito
+    // 3. Insertar stock estadístico a las 00:00 del día de la fecha -u hora de ejecución- (tabla stock_stat)
+    // 4. Copiar entradas stock corriente del punto 1 a stock histórico (tabla stock_hist)
+    // 5. Borrar/Blanquear tabla stock corriente (tabla stock_01)
+  };
+
+  PkuyApp.getStockProducto = function (prodID, almID=null) {
+    // 1. Get stock estadístico -filtrado por prodID (y almID)- (tabla stock_stat)
+    // 2. Get stock corriente -filtrado por prodID (y almID)-  (tabla stock_01)
+    // 3. Sumarizar por Depósito
+  };
+
+  PkuyApp.getStockDeposito = function (almID) {
+    // 1. Get stock estadístico -filtrado por almID- (tabla stock_stat)
+    // 2. Get stock corriente -filtrado por almID- (tabla stock_01)
+    // 3. Sumarizar por Producto
+  };
+
+  PkuyApp.getStockProductoMovimientos = function (prodID, almID) {
+    // 1. Get stock estadístico -filtrado por prodID y almID- (tabla stock_stat)
+    // 2. Get stock corriente -filtrado por almID y almID- (tabla stock_01)
+    // 3. Recorrer tabla agregando un field más que sea sum = stock_stat + stock01(...)
+  };
+  
+  PkuyApp.checkStockDisponible = function (prodID, almID, cant) {
+    // 1. PkuyApp.getStockProducto(prodID, almID)
+    // 2. if(stock.cant >= cant) ok 
+    // 3. else "cantidad no disponible"
+  };
+
+  PkuyApp.nuevoMovimiento = function (prodID, almID, cant, claseMov, ordID) {
+    // 1. if (claseMov = "Egreso") > PkuyApp.checkStockDisponible(prodID, almID, cant)
+    // 2. new cl_movimiento(........) <<<--- CONSTRUCTOR DEBE VALIDAR claseMov, ordID CONTRA MAESTRO
+    // 3. PkuyApp.appendObjToSheetTable(.....)
+  };
+  
+  PkuyApp.backupDatabase = function () {
+    function yyyymmdd() {
+    var now = new Date();
+    var y = now.getFullYear();
+    var m = now.getMonth() + 1;
+    var d = now.getDate();
+    return '' + y + (m < 10 ? '0' : '') + m + (d < 10 ? '0' : '') + d;
+}
+  var newFile = PkuyApp.dbBackupNombre + yyyymmmdd();
+  var request = gapi.client.drive.files.copy({
+    'fileId': PkuyApp.dbSpreadsheet,
+    'resource': {'title': newFile}
+  });
+  request.execute(function(resp) {
+    console.log('PkuyDB backup -> ' + newFile + ' (' + resp.id + ')');
+    nuevoDBBackup = {
+      'dbBackup': newFile,
+      'dbBackupID' : resp.id,
+      // 'TS': 
+      // 'usuario':
+    };
+    PkuyApp.appendObjToSheetTable(nuevoDBBackup,'dbbackup_01',false, function(){})
+  });
+}
 
   PkuyApp.testMode = true;
 
