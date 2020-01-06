@@ -163,6 +163,7 @@ angular.module('PkuyApp', ['ngMaterial'])
 
   })
   .controller('bottomSheetCtrl', function ($scope, $mdBottomSheet) {
+    console.log('consola controller')
     PkuyApp.consola();
 
     $scope.hide = function () {

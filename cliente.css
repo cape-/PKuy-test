@@ -13,18 +13,32 @@ md-icon.cliente-icon {
 }
 
 md-bottom-sheet {
-    background-color: beige;
-    max-height: 50px;
+    background-color: #200F20;
+    max-height: 18px;
+    bottom: 18px;
+    padding-bottom: 0px;
+    overflow: hidden;
 }
 
 md-bottom-sheet:hover {
+    bottom:0px;
     max-height: 300px;
 }
 
-div.consolaContainer {
+md-bottom-sheet div{
+    margin-top: -18px;
+}
+
+md-bottom-sheet div.tituloContainer {
+    color:wheat;
+}
+
+md-bottom-sheet div.consolaContainer {
+    margin-top: 8px;
+    min-height: 16px;
     max-height: 200px;
     overflow: auto;
-    flex: 100;
+    /* flex: 100; */
     padding: 0 20px;
     color: deeppink;
 }

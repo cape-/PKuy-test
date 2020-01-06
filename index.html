@@ -2,9 +2,10 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1"> -->
+    <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,width=device-width,height=device-height,target-densitydpi=device-dpi,user-scalable=yes" />
     <link rel="manifest" href="/pkuy-manifest.json" />
-    <link rel="shortcut icon" type="image/png" href="/pkuy-icon-1x.png?v=2" />
+    <link rel="shortcut icon" type="image/png" href="pkuy-icon-1x.png" />
     <!-- Angular Material style sheet -->
     <link rel="stylesheet"
         href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
@@ -13,44 +14,46 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 
-<body ng-app="PkuyApp" ng-controller="cliente" ng-cloak>
-    <div class="md-padding" id="popupContainer">
-        <md-menu md-offset="0 40" ng-repeat="menu in appMenu">
-            <!-- Trigger element is a md-button with an icon -->
-            <md-button ng-click="$mdMenu.open($event)">
-                {{ menu.titulo }}
-            </md-button>
-            <md-menu-content>
-                <md-menu-item ng-repeat="entrada in menu.entradas">
-                    <md-button ng-click="entrada.do()">{{entrada.titulo}}</md-button>
-                </md-menu-item>
-            </md-menu-content>
-        </md-menu>
+<body ng-app="PkuyApp" ng-cloak>
+    <div ng-controller="cliente" flex>
+        <div class="md-padding">
+            <md-menu md-offset="0 40" ng-repeat="menu in appMenu">
+                <!-- Trigger element is a md-button with an icon -->
+                <md-button ng-click="$mdMenu.open($event)">
+                    {{ menu.titulo }}
+                </md-button>
+                <md-menu-content>
+                    <md-menu-item ng-repeat="entrada in menu.entradas">
+                        <md-button ng-click="entrada.do()">{{entrada.titulo}}</md-button>
+                    </md-menu-item>
+                </md-menu-content>
+            </md-menu>
 
-        <div class="dialog-demo-content" layout="row" layout-wrap layout-margin layout-align="center">
-            <md-button class="md-primary md-raised" ng-click="showPrompt($event)">
-                Inicio
-            </md-button>
-            <md-button class="md-primary md-raised" ng-click="showListadoClientes($event)">
-                Listado de Clientes
-            </md-button>
-            <md-button class="md-primary md-raised" ng-click="showTabDialog($event)">
-                Tab Dialog
-            </md-button>
+            <div class="dialog-demo-content" layout="row" layout-wrap layout-margin layout-align="center">
+                <md-button class="md-primary md-raised" ng-click="showPrompt($event)">
+                    Inicio
+                </md-button>
+                <md-button class="md-primary md-raised" ng-click="showListadoClientes($event)">
+                    Listado de Clientes
+                </md-button>
+                <md-button class="md-primary md-raised" ng-click="showTabDialog($event)">
+                    Tab Dialog
+                </md-button>
+            </div>
+            <div flex="100">
+                <span flex></span>
+                <md-progress-circular ng-disabled="!pkuyLoading" md-diameter="96"></md-progress-circular>
+                <span flex></span>
+            </div>
         </div>
-        <div flex="100">
-            <span flex></span>
-            <md-progress-circular ng-disabled="!pkuyLoading" md-diameter="96"></md-progress-circular>
-            <span flex></span>
-        </div>
-    </div>
-    <!-- <button id="authorize_button" onclick="PkuyApp.handleAuthClick()">Autorizar y Conectar a PKuy-test</button>
-    <button id="signout_button">Desconectar</button>
-    <button id="listarContactos_button" onclick="PkuyApp.listarContactos()">Cargar Contactos</button> -->
-    <div class="bottom-sheet-demo inset" layout="row" layout-sm="column" layout-align="center">
+        <!-- <button id="authorize_button" onclick="PkuyApp.handleAuthClick()">Autorizar y Conectar a PKuy-test</button>
+            <button id="signout_button">Desconectar</button>
+            <button id="listarContactos_button" onclick="PkuyApp.listarContactos()">Cargar Contactos</button> -->
         <md-button flex="50" class="md-primary md-raised" ng-click="showConsola()">CONSOLA</md-button>
+        <div class="bottom-sheet-demo inset" layout="row" layout-sm="column" layout-align="center">
+        </div>
     </div>
-    
+
     <!-- Angular Material requires Angular.js Libraries -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
