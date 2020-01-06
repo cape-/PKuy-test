@@ -82,16 +82,12 @@
     // });
   </script>
 
+  <script type="text/javascript" src="gapi_keys.js"></script>
   <script type="text/javascript">
-    var PkuyApp = {
-      ml_client_id: 2996817738367875
-    }
     function meliLoaded() {
       PkuyApp.ng = angular.module('pkuyApp', []);
       PkuyApp.ng.controller('mainController', function ($scope) {
-        MELI.init({
-          client_id: PkuyApp.ml_client_id
-        });
+        MELI.init(PkuyApp.meliClientParams);
         MELI.getLoginStatus(function (status) {
           if (status.state !== 'AUTHORIZED') {
             MELI.login(meliLogged($scope));
