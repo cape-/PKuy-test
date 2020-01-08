@@ -1,14 +1,16 @@
 angular.module('PkuyApp', ['ngMaterial'])
 
-  .controller('cliente', function ($scope, $mdDialog, $mdBottomSheet) {
-    console.log(".controller('cliente')");
+  .controller('main', function ($scope, $mdDialog, $mdBottomSheet) {
+    console.debug(".controller('cliente')");
 
     $scope.onLoaded = function () {
+      // Actualizar Vista
       $scope.pkuyLoading = false;
       $scope.$apply();
     }
 
     $scope.pkuyLoading = true;
+
     PkuyApp.startPkuyDB($scope.onLoaded);
 
     $scope.appMenu = [{
@@ -25,6 +27,12 @@ angular.module('PkuyApp', ['ngMaterial'])
         { titulo: 'Cargar Contactos', do: function () { PkuyApp.listarContactos() } },
         { titulo: 'Listado de Contactos', do: function ($event) { $scope.showListadoClientes($event) } },
         { titulo: 'Gritar', do: function () { alert('ahhhhhhhh!!!') } }
+      ]
+    },
+    {
+      titulo: 'X.Admin',
+      entradas: [
+        { titulo: 'Borrar localStorage', do: function () { localStorage.clear() } }
       ]
     }
     ]
@@ -58,34 +66,16 @@ angular.module('PkuyApp', ['ngMaterial'])
         fullscreen: true
       })
         .then(function (answer) {
-          console.log("[Ok] Dialogo Cerrado = " + answer);
+          // console.log("[Ok] Dialogo Cerrado = " + answer);
         }, function () {
-          console.log("[Ok] Dialogo Cancelado");
+          // console.log("[Ok] Dialogo Cancelado");
         });
     };
-
-    $scope.cargarConsola = function () {
-      console.log("cargarConsola()");
-
-      $mdBottomSheet.show({
-        templateUrl: 'bottom-sheet-template.html',
-        controller: 'bottomSheetCtrl',
-        disableBackdrop: true,
-        disableParentScroll: false,
-        isLockedOpen: true
-      }).then(function (clickedItem) {
-        console.log(clickedItem['name'] + ' clicked!');
-      }).catch(function (error) {
-        console.log("User clicked outside or hit escape");
-      });
-    };
-
-    $scope.cargarConsola();
 
   })
 
   .controller('dialogController', function ($scope, $mdDialog) {
-    console.log(".controller('DialogController')");
+    console.debug(".controller('DialogController')");
 
     $scope.hide = function () {
       $mdDialog.hide();
@@ -99,6 +89,8 @@ angular.module('PkuyApp', ['ngMaterial'])
       $mdDialog.hide(answer);
     };
 
+
+    //TODO: Pasar a PKuy.js!
     $scope.importarContactos = function (contactos) {
       selContactos = contactos.filter(contacto => contacto.selected && !contacto.cliID);
       if (!selContactos.length) {
@@ -111,20 +103,19 @@ angular.module('PkuyApp', ['ngMaterial'])
         email: contacto.email
       });
       PkuyApp.appendObjToSheetTable(nuevaDireccion, cl_maestroDirecciones.sheetName(), true, function (dirUpdatedData) {
-        // console.log('importarContactos.appendDir.callback');
-        // console.debug(dirUpdatedData);
+        // importarContactos.appendDir.callback
         let nuevoCliente = new cl_cliente({
           nombre: contacto.nombre,
           dirID: dirUpdatedData.values[0][0],
           resourceName: contacto.resourceName
         });
         PkuyApp.appendObjToSheetTable(nuevoCliente, cl_maestroClientes.sheetName(), true, function (cliUpdatedData) {
-          // console.log('importarContactos.appendCli.callback');
-          console.log('[Ok] Cliente Nro.' + cliUpdatedData.values[0][0] + ' creado con dirección ' + dirUpdatedData.values[0][0]);
+          // importarContactos.appendCli.callback
+          PkuyApp.log('Cliente Nro.' + cliUpdatedData.values[0][0] + ' creado con dirección ' + dirUpdatedData.values[0][0]);
           if (selContactos.length)
             $scope.importarContactos(selContactos);
           else {
-            console.log("[Ok] Importación de Clientes Finalizada")
+            PkuyApp.log("Importación de Clientes desde Google Contactos: Finalizada")
             $mdDialog.hide();
           }
         })
@@ -161,12 +152,4 @@ angular.module('PkuyApp', ['ngMaterial'])
       if (PkuyApp.testMode && $scope.contactos.length > 20) break; // TEST!!!
     };
 
-  })
-  .controller('bottomSheetCtrl', function ($scope, $mdBottomSheet) {
-    console.log('consola controller')
-    PkuyApp.consola();
-
-    $scope.hide = function () {
-      $mdBottomSheet.hide();
-    }
-  })
+  });

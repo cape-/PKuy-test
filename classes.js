@@ -5,7 +5,7 @@ class PKuyObj_base {
   constructor() {
   }
   direccion() {
-    return PkuyApp.direcciones.getByID(this.dirID);
+    return PkuyApp.db.direcciones.getByID(this.dirID);
   }
 }
 
@@ -42,9 +42,9 @@ class cl_cliente extends PKuyObj_base {
   nombreApellido() {
     return this.nombre + ' ' + this.apellido;
   }
-  pedidos() {
-    return PkuyApp.maestroPedidos.getByCliID(this.cliID);
-  }
+  // pedidos() {
+  //   return PkuyApp.maestroPedidos.getByCliID(this.cliID);
+  // }
   pedidosCerrados() {
   }
 }
@@ -483,3 +483,11 @@ class cl_maestroDirecciones {
   }
 }
 
+// ord_status
+// status_tipo
+// prod_precios
+// tipo_precio
+// mov_01
+// tipo_mov
+// stock
+// mov_hist

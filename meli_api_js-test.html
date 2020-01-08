@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+  <!-- MELI API DOCS : https://github.com/mercadolibre/mercadolibre.js -->
   <script src="https://static.mlstatic.com/org-img/sdk/mercadolibre-1.0.4.js"></script>
   <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
   <!-- <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
@@ -15,8 +16,8 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
     integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
     crossorigin="anonymous"></script>
-  
-    <title>PKuy App - MeLi API Tests</title>
+
+  <title>PKuy App - MeLi API Tests</title>
 </head>
 
 <body ng-controller="mainController">
@@ -107,15 +108,19 @@
           PkuyApp.mlData.targetSeller = $scope.targetSeller = data[2];
           PkuyApp.mlData.targetSellerObj = data;
           $scope.$apply()
-        })
+        });
         meliGet("/orders/search/recent?seller=" + 146925020, function (data) {
           PkuyApp.mlData.recentOrders = $scope.recentOrders = data[2];
           $scope.$apply()
-        })
+        });
+        meliGet("/orders/search/recent?seller=" + 97505599, function (data) {
+          PkuyApp.mlData.recentOrders = $scope.recentOrders = data[2];
+          $scope.$apply()
+        });
         meliGet("/currencies", function (data) {
           PkuyApp.mlData.currencies = $scope.currencies = data[2];
           $scope.$apply()
-        })
+        });
         meliGet("/users/me", function (data) {
           PkuyApp.mlData.me = $scope.me = data[2];
           $scope.$apply()
@@ -135,13 +140,24 @@
     }
     function meliToConsole(what) {
       MELI.get(what, {}, function (data) {
-        console.log(what + ' : ');
-        console.log(data[2]);
+        console.debug(what + ' : ');
+        console.debug(data[2]);
       });
     }
-    function meliGet(what, callback) {
-      console.log('meliGet ' + what);
-      MELI.get(what, {}, callback);
+    function meliGet(what, callback, callbackerr = function () { }) {
+      MELI.get(what, {}, function (data) {
+        console.debug('MELI GET REQUEST')
+        console.debug(what);
+
+        if (data[0] === 200) {
+          console.debug("MELI GET RESPONSE")
+          console.debug(data);
+          callback(data);
+        } else {
+          console.debug('MELI ERR ' + data[0]);
+          callbackerr(data[2]);
+        }
+      });
     }
     meliLoaded();
   </script>

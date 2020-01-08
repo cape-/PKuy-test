@@ -12,33 +12,53 @@ md-icon.cliente-icon {
     width: auto
 }
 
-md-bottom-sheet {
-    background-color: #200F20;
-    max-height: 18px;
-    bottom: 18px;
-    padding-bottom: 0px;
+div.PkuyConsola {
+    background-color: #222;
+    position: fixed;
+    width: 100%;
+    z-index: 99;
+    bottom: 0;
+    max-height: 1em;
     overflow: hidden;
+    transition: max-height 0.5s ease-out;
 }
 
-md-bottom-sheet:hover {
-    bottom:0px;
-    max-height: 300px;
-}
-
-md-bottom-sheet div{
-    margin-top: -18px;
-}
-
-md-bottom-sheet div.tituloContainer {
-    color:wheat;
-}
-
-md-bottom-sheet div.consolaContainer {
-    margin-top: 8px;
-    min-height: 16px;
-    max-height: 200px;
+div.PkuyConsola:hover {
+    max-height: 50%;
     overflow: auto;
-    /* flex: 100; */
-    padding: 0 20px;
-    color: deeppink;
+    transition: max-height 0.25s ease-in;
+}
+
+div.PkuyConsola * {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+div.PkuyConsola div.consolaContainer {
+    width: 100%;
+}
+
+div.PkuyConsola div.tituloContainer span {
+    font-weight: bolder;
+    color: coral;
+    margin: 0 16px 0 6px;
+}
+
+div.PkuyConsola div.consolaContainer span {
+    display: block;
+    color: mediumseagreen;
+}
+
+div.PkuyConsola div.consolaContainer span:hover {
+    background-color: #233;
+}
+
+div.PkuyConsola div.consolaContainer span.warn {
+    display: block;
+    color: gold;
+}
+
+div.PkuyConsola div.consolaContainer span.error {
+    color: crimson;
+    text-decoration: underline dotted;
 }
