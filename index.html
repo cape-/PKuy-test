@@ -11,58 +11,82 @@
     <link rel="stylesheet"
         href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
     <link rel="stylesheet" href="cliente.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic"> -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 
 <body ng-app="PkuyApp" ng-cloak>
     <div ng-controller="main" flex>
-        <div class="md-padding">
-            <md-menu md-offset="0 40" ng-repeat="menu in appMenu">
-                <!-- Trigger element is a md-button with an icon -->
-                <md-button ng-click="$mdMenu.open($event)">
-                    {{ menu.titulo }}
-                </md-button>
-                <md-menu-content>
-                    <md-menu-item ng-repeat="entrada in menu.entradas">
-                        <md-button ng-click="entrada.do()">{{entrada.titulo}}</md-button>
-                    </md-menu-item>
-                </md-menu-content>
-            </md-menu>
-
-            <div class="dialog-demo-content" layout="row" layout-wrap layout-margin layout-align="center">
-                <md-button class="md-primary md-raised" ng-click="showPrompt($event)">
-                    Inicio
-                </md-button>
-                <md-button class="md-primary md-raised" ng-click="showListadoClientes($event)">
-                    Listado de Clientes
-                </md-button>
-                <md-button class="md-primary md-raised" ng-click="showTabDialog($event)">
-                    Tab Dialog
-                </md-button>
+        <md-toolbar class="md-menu-toolbar">
+            <div layout="row">
+                <md-toolbar-filler layout layout-align="center center">
+                    <i class="material-icons">business</i>
+                </md-toolbar-filler>
+                <div>
+                    <h2 class="md-toolbar-tools">PkuyApp</h2>
+                    <md-menu-bar>
+                        <md-menu ng-repeat="menu in appMenu">
+                            <md-button ng-click="$mdMenu.open($event)">
+                                {{ menu.titulo }}
+                            </md-button>
+                            <md-menu-content>
+                                <md-menu-item ng-repeat="entrada in menu.entradas">
+                                    <!-- IF = 1 solo boton -->
+                                    <md-button ng-click="entrada.do()" ng-if="!entrada.subentradas">{{entrada.titulo}}
+                                    </md-button>
+                                    <!-- ELSE = 1 submenu -->
+                                    <md-menu ng-if="entrada.subentradas">
+                                        <md-button ng-click="$mdMenu.open($event)">
+                                            {{ entrada.titulo }}
+                                        </md-button>
+                                        <md-menu-content>
+                                            <md-menu-item ng-repeat="subentrada in entrada.subentradas">
+                                                <md-button ng-click="subentrada.do()">
+                                                    {{subentrada.titulo}}
+                                                </md-button>
+                                            </md-menu-item>
+                                        </md-menu-content>
+                                    </md-menu>
+                                </md-menu-item>
+                            </md-menu-content>
+                        </md-menu>
+                    </md-menu-bar>
+                </div>
             </div>
-            <div flex="100">
-                <span flex></span>
-                <md-progress-circular ng-disabled="!pkuyLoading" md-diameter="96"></md-progress-circular>
-                <span flex></span>
-            </div>
-        </div>
-        <!-- <button id="authorize_button" onclick="PkuyApp.handleAuthClick()">Autorizar y Conectar a PKuy-test</button>
-            <button id="signout_button">Desconectar</button>
-            <button id="listarContactos_button" onclick="PkuyApp.listarContactos()">Cargar Contactos</button> -->
+        </md-toolbar>
+        <!-- LOADING -->
+        <md-progress-circular ng-disabled="!pkuyLoading" id="loadingCircle" md-diameter="72"></md-progress-circular>
+        <!-- <div layout="rows" layout-align="center center">
+            <span flex></span>
+            <md-progress-circular ng-disabled="pkuyLoading" md-diameter="96"></md-progress-circular>
+            <span flex></span>
+        </div> -->
+        <!-- CONSOLA -->
+        <md-content layout="row" layout-align="start center" layout-padding>
+            <p class="">PkuyApp Log</p>
+            <h5>Off</h5>
+            <md-switch ng-model="pkuyLoading" aria-label="Toggle Progress Circular Indicators">
+                <h5>On</h5>
+            </md-switch>
+        </md-content>
 
         <div class="PkuyConsola" layout="row">
             <div class="tituloContainer">
-                <pre><span>PkuyApp Log &rarr;</span><md-tooltip>La <b>Consola</b> permite tener registro de las actividades del sistema</md-tooltip></pre>
+                <span>PkuyApp Log &rarr;</span>
+                <md-tooltip>La <b>Consola</b> permite tener registro de las actividades del sistema</md-tooltip>
+                </pre>
             </div>
-            <div class="consolaContainer">
-                <pre id="consolaDiv"></pre>
+            <div class="consolaContainer" id="consolaDiv" flex>
+            </div>
+            <div class="userDataContainer">
+                {{ currentUser.nombre + ' (' + currentUser.email + ')'}}
             </div>
         </div>
 
     </div>
 
     <!-- Angular Material requires Angular.js Libraries -->
+    <!-- TODO remover scipts innecesarios -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
@@ -75,7 +99,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
 
     <!-- PkuyApp Credenciales  -->
-    <script type="text/javascript" src="gapi_keys.js"></script>
+    <script src="PkuyApp_keys.js"></script>
     <!-- PkuyApp Core  -->
     <script src="classes.js"></script>
     <script src="PKuy.js"></script>

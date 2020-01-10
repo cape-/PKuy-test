@@ -1,3 +1,15 @@
+html, body {
+    height: 100%;
+    font-family: Google Sans, Noto Sans, sans-serif;
+}
+
+#loadingCircle{
+    position: fixed;
+    z-index: 99;
+    top: 18px;
+    right: 30px;
+}
+
 md-icon.contacto-icon {
     color: #6B4;
     font-size: 48px;
@@ -18,24 +30,26 @@ div.PkuyConsola {
     width: 100%;
     z-index: 99;
     bottom: 0;
-    max-height: 1em;
+    font-family: monospace;
+    max-height: 1.6em;
+    padding-top: 0.2em;
     overflow: hidden;
     transition: max-height 0.5s ease-out;
 }
 
 div.PkuyConsola:hover {
-    max-height: 50%;
+    max-height: 30%;
     overflow: auto;
     transition: max-height 0.25s ease-in;
 }
 
-div.PkuyConsola * {
+div.PkuyConsola div {
     margin-top: 0;
     margin-bottom: 0;
 }
 
-div.PkuyConsola div.consolaContainer {
-    width: 100%;
+div.PkuyConsola div.userDataContainer {
+    color: burlywood;
 }
 
 div.PkuyConsola div.tituloContainer span {

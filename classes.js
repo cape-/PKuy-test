@@ -5,7 +5,7 @@ class PKuyObj_base {
   constructor() {
   }
   direccion() {
-    return PkuyApp.db.direcciones.getByID(this.dirID);
+    return PkuyApp.db.maestroDirecciones.getByID(this.dirID);
   }
 }
 
@@ -25,8 +25,6 @@ class cl_cliente extends PKuyObj_base {
   ptoDespachoID_default;
   medioPago_default;
   resourceName;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -73,8 +71,6 @@ class cl_pedido extends PKuyObj_base {
   tiempoRestante;
   prioridad;
   precioTotal;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -85,36 +81,64 @@ class cl_pedido extends PKuyObj_base {
     this.key = this.ordID + this.ordPos;
     // if (this.TS <<< Seguir con inicializacion
   }
-  agregarProducto(cbtePago){
+  agregarProducto(cbtePago) {
     // crear posición
     // 
     // cambiar status
   }
-  
-  quitarProducto(cbtePago){
+
+  quitarProducto(cbtePago) {
 
   }
 
-  confirmarPago(cbtePago){
+  confirmarPago(cbtePago) {
     // asociar comprobante
     // cambiar status
   }
 
-  confirmar(){
+  confirmar() {
     // generar entrega
     // reservar stock (generar mov.material)
     // cambiar status
   }
 }
 
+/* CLASE STATUS DE PEDIDOS */
+class cl_statusPedido extends PKuyObj_base {
+  ordID;
+  statusTS;
+  tipoStatus;
+
+  constructor(dataIn) {
+    super(dataIn);
+    var attrib;
+    for (attrib in dataIn) {
+      this[attrib] = dataIn[attrib];
+    }
+    this.key = this.ordID + this.statusTS + this.tipoStatus;
+  }
+}
+
+/* CLASE TIPO DE STATUS DE PEDIDOS */
+class cl_tipoStatusPedido extends PKuyObj_base {
+  tipoStatus;
+  nombreTipoStatus;
+
+  constructor(dataIn) {
+    super(dataIn);
+    var attrib;
+    for (attrib in dataIn) {
+      this[attrib] = dataIn[attrib];
+    }
+    this.key = this.tipoStatus;
+  }
+}
 
 /* CLASE ALMACEN*/
 class cl_almacen extends PKuyObj_base {
   almacenID;
   nombreAlmacen;
   dirID;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -131,8 +155,6 @@ class cl_ptoDespacho extends PKuyObj_base {
   ptoDespachoID;
   nombrePtoDespacho;
   dirID;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -148,8 +170,6 @@ class cl_ptoDespacho extends PKuyObj_base {
 class cl_medioPago extends PKuyObj_base {
   medioPago;
   descripcion;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -171,8 +191,6 @@ class cl_producto extends PKuyObj_base {
   UM;
   peso;
   mlUrl;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -192,8 +210,6 @@ class cl_precioProducto extends PKuyObj_base {
   monto;
   moneda;
   fechaHora_fin;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -209,8 +225,6 @@ class cl_precioProducto extends PKuyObj_base {
 class cl_tipoPrecio extends PKuyObj_base {
   tipoPrecio;
   nombreTipoPrecio;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -219,41 +233,6 @@ class cl_tipoPrecio extends PKuyObj_base {
       this[attrib] = dataIn[attrib];
     }
     this.key = this.tipoPrecio;
-  }
-}
-
-/* CLASE STATUS DE PEDIDOS */
-class cl_statusPedido extends PKuyObj_base {
-  ordID;
-  statusTS;
-  tipoStatus;
-  TS;
-  usuario;
-
-  constructor(dataIn) {
-    super(dataIn);
-    var attrib;
-    for (attrib in dataIn) {
-      this[attrib] = dataIn[attrib];
-    }
-    this.key = this.ordID + this.statusTS + this.tipoStatus;
-  }
-}
-
-/* CLASE TIPO DE STATUS DE PEDIDOS */
-class cl_tipoStatusPed extends PKuyObj_base {
-  tipoStatus;
-  nombreTipoStatus;
-  TS;
-  usuario;
-
-  constructor(dataIn) {
-    super(dataIn);
-    var attrib;
-    for (attrib in dataIn) {
-      this[attrib] = dataIn[attrib];
-    }
-    this.key = this.tipoStatus;
   }
 }
 
@@ -271,8 +250,6 @@ class cl_movMaterial extends PKuyObj_base {
   almacenID_e;
   almacenID_i;
   cliID;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -287,9 +264,8 @@ class cl_movMaterial extends PKuyObj_base {
 /* CLASE TIPO DE MOVIMIENTO DE MATERIAL */
 class cl_tipoMovMat extends PKuyObj_base {
   tipoMov;
+  indicadorEI;
   descripcion;
-  TS;
-  usuario;
 
   constructor(dataIn) {
     super(dataIn);
@@ -383,7 +359,8 @@ class cl_direccion {
 
 /* CLASE MAESTRO DE CLIENTES */
 class cl_maestroClientes {
-  static sheetName() { return 'cli_01' };
+  static sheetName() { return 'cli_01' }
+
   constructor(tableData) {
     this.recordSet = new Array();
     var cliente_data;
@@ -406,14 +383,38 @@ class cl_maestroPedidos {
       this.recordSet.push(new cl_pedido(tableData[pedido_data]));
     }
   }
-  getByID(ordID) {
-
+  getByID(queryOrdID) {
+    return this.recordSet.filter((pedido) => pedido.ordID == queryOrdID);
   }
   getByCliID(queryCliID) {
     return this.recordSet.filter((pedido) => pedido.cliID == queryCliID);
   }
   getByProdID(queryProdID) {
     return this.recordSet.filter((pedido) => pedido.prodID == queryProdID);
+  }
+}
+
+/* CLASE MAESTRO DE STATUS DE PEDIDOS */
+class cl_statusPedidos {
+  static sheetName() { return 'ord_status' };
+  constructor(tableData) {
+    this.recordSet = new Array();
+    var statusPedido_data;
+    for (statusPedido_data in tableData) {
+      this.recordSet.push(new cl_statusPedido(tableData[statusPedido_data]));
+    }
+  }
+}
+
+/* CLASE TIPO DE STATUS DE PEDIDOS */
+class cl_tiposStatusPedido {
+  static sheetName() { return 'status_tipo' };
+  constructor(tableData) {
+    this.recordSet = new Array();
+    var tipoStatusPedido_data;
+    for (tipoStatusPedido_data in tableData) {
+      this.recordSet.push(new cl_tipoStatusPedido(tableData[tipoStatusPedido_data]));
+    }
   }
 }
 
@@ -448,7 +449,7 @@ class cl_maestroMediosPago {
     this.recordSet = new Array();
     var medioPago_data;
     for (medioPago_data in tableData) {
-      this.recordSet.push(new cl_ptoDespacho(tableData[medioPago_data]));
+      this.recordSet.push(new cl_medioPago(tableData[medioPago_data]));
     }
   }
 }
@@ -464,7 +465,66 @@ class cl_maestroProductos {
     }
   }
   getByProdID(prodID) {
-    return (this.recordSet[prodID - 1].prodID == prodID) ? this.recordSet[prodID - 1] : null;
+  }
+}
+
+/* CLASE MAESTRO DE PRECIOS */
+class cl_maestroPrecios {
+  static sheetName() { return 'prod_precios' };
+  constructor(tableData) {
+    this.recordSet = new Array();
+    var productoPrecio_data;
+    for (productoPrecio_data in tableData) {
+      this.recordSet.push(new cl_precioProducto(tableData[productoPrecio_data]));
+    }
+  }
+}
+
+/* CLASE TIPOS DE PRECIO */
+class cl_tiposPrecios {
+  static sheetName() { return 'tipo_precio' };
+  constructor(tableData) {
+    this.recordSet = new Array();
+    var tipoPrecio_data;
+    for (tipoPrecio_data in tableData) {
+      this.recordSet.push(new cl_tipoPrecio(tableData[tipoPrecio_data]));
+    }
+  }
+}
+
+/* CLASE MAESTRO DE MOVIMIENTOS DE MATERIAL */
+class cl_maestroMovimientos {
+  static sheetName() { return 'mov_01' };
+  constructor(tableData) {
+    this.recordSet = new Array();
+    var movimientos_data;
+    for (movimientos_data in tableData) {
+      this.recordSet.push(new cl_movMaterial(tableData[movimientos_data]));
+    }
+  }
+}
+
+/* CLASE TIPOS DE MOVIMIENTO DE MATERIAL */
+class cl_tiposMovimiento {
+  static sheetName() { return 'movimientos_tipo' };
+  constructor(tableData) {
+    this.recordSet = new Array();
+    var tiposMovimiento_data;
+    for (tiposMovimiento_data in tableData) {
+      this.recordSet.push(new cl_tipoMovMat(tableData[tiposMovimiento_data]));
+    }
+  }
+}
+
+/* CLASE MAESTRO DE CALCULOS DE STOCK */
+class cl_maestroCalculosStock {
+  static sheetName() { return 'calculos_stock' };
+  constructor(tableData) {
+    this.recordSet = new Array();
+    var calculosStock_data;
+    for (calculosStock_data in tableData) {
+      this.recordSet.push(new cl_calculoStock(tableData[calculosStock_data]));
+    }
   }
 }
 
@@ -479,15 +539,8 @@ class cl_maestroDirecciones {
     }
   }
   getByID(dirID) {
-    return (this.recordSet[dirID - 1].dirID == dirID) ? this.recordSet[dirID - 1] : null;
   }
 }
 
-// ord_status
-// status_tipo
-// prod_precios
-// tipo_precio
-// mov_01
-// tipo_mov
-// stock
-// mov_hist
+// contabilizacion
+// balance

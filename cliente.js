@@ -1,47 +1,78 @@
 angular.module('PkuyApp', ['ngMaterial'])
 
-  .controller('main', function ($scope, $mdDialog, $mdBottomSheet) {
-    console.debug(".controller('cliente')");
+  .config(function ($mdThemingProvider) {
+    $mdThemingProvider.theme('default')
+      .primaryPalette('pink')
+      .accentPalette('orange')
+      .dark();
+  })
 
+  .factory('PkuyLink', function () {
+    return PkuyApp;
+  })
+
+  .controller('main', function ($scope, $rootScope, $mdDialog, PkuyLink) {
+
+    // StartUp
+    $rootScope.pkuyLoading = true;
+    
     $scope.onLoaded = function () {
       // Actualizar Vista
-      $scope.pkuyLoading = false;
+      $rootScope.pkuyLoading = false;
+      $rootScope.currentUser = PkuyLink.currentUser;
       $scope.$apply();
     }
+    PkuyLink.startPkuyDB($scope.onLoaded);
 
-    $scope.pkuyLoading = true;
+    // Menus
+    $scope.appMenu = [
+      {
+        titulo: '0.Sistema',
+        entradas: [
+          { titulo: 'Conectar con Google', do: function () { PkuyLink.handleAuthClick() } },
+          { titulo: 'Desconectar', do: function () { PkuyLink.handleSignoutClick() } },
+          { titulo: 'Iniciar PkuyApp', do: function () { PkuyLink.startPkuyDB() } }
+        ]
+      },
+      {
+        titulo: '1.Consultas',
+        entradas: [
+          { titulo: 'Actualizar Contactos Google', do: function () { PkuyLink.cargarContactosGoogle(true) } },
+          { titulo: 'Importar Clientes desde Contactos Google', do: function ($event) { $scope.dialogImportarClientes($event) } },
+          {
+            titulo: 'Un submenu', subentradas: [
+              { titulo: 'Loading', do: function () { $rootScope.lo() } },
+              { titulo: 'Stop Loading', do: function () { $rootScope.slo() } },
+            ]
+          }
+        ]
+      },
+      {
+        titulo: 'X.Admin',
+        entradas: [
+          { titulo: 'Borrar localStorage', do: function () { localStorage.clear() } },
+          { titulo: 'BackUp PkuyDB', do: function () { PkuyLink.backupPkuyDB() } }
+        ]
+      }
+    ];
 
-    PkuyApp.startPkuyDB($scope.onLoaded);
+    // Loading
+    $rootScope.lo = function () {
+      $rootScope.pkuyLoading = true;
+      // $scope.$apply();
+    };
 
-    $scope.appMenu = [{
-      titulo: '0.Sistema',
-      entradas: [
-        { titulo: 'Acceder y autorizar', do: function () { PkuyApp.handleAuthClick() } },
-        { titulo: 'Desconectar', do: function () { PkuyApp.handleSignoutClick() } },
-        { titulo: 'Iniciar PkuyApp', do: function () { PkuyApp.startPkuyDB() } }
-      ]
-    },
-    {
-      titulo: '1.Consultas',
-      entradas: [
-        { titulo: 'Cargar Contactos', do: function () { PkuyApp.listarContactos() } },
-        { titulo: 'Listado de Contactos', do: function ($event) { $scope.showListadoClientes($event) } },
-        { titulo: 'Gritar', do: function () { alert('ahhhhhhhh!!!') } }
-      ]
-    },
-    {
-      titulo: 'X.Admin',
-      entradas: [
-        { titulo: 'Borrar localStorage', do: function () { localStorage.clear() } }
-      ]
-    }
-    ]
+    // Stop Loading
+    $rootScope.slo = function () {
+      $rootScope.pkuyLoading = false;
+      // $scope.$apply();
+    };
 
     $scope.showPrompt = function (ev) {
       // Appending dialog to document.body to cover sidenav in docs app
       var confirm = $mdDialog.prompt()
         .title('Bienvenidx!')
-        .textContent('Contanos como te sentís hoy ' + PkuyApp.currentUser.nombre)
+        .textContent('Contanos como te sentís hoy ' + PkuyLink.currentUser.nombre)
         .placeholder('Hoy me siento')
         .ariaLabel('Hoy me siento')
         .targetEvent(ev)
@@ -56,10 +87,13 @@ angular.module('PkuyApp', ['ngMaterial'])
       });
     };
 
-    $scope.showListadoClientes = function (ev) {
+    $scope.dialogImportarClientes = async function (ev) {
+
+      await PkuyLink.cargarContactosGoogle();
+
       $mdDialog.show({
         controller: 'dialogController',
-        templateUrl: 'listadoClientes.tmpl.html',
+        templateUrl: 'importarClientes.tmpl.html',
         parent: angular.element(document.body),
         targetEvent: ev,
         clickOutsideToClose: true,
@@ -74,54 +108,43 @@ angular.module('PkuyApp', ['ngMaterial'])
 
   })
 
-  .controller('dialogController', function ($scope, $mdDialog) {
-    console.debug(".controller('DialogController')");
-
-    $scope.hide = function () {
-      $mdDialog.hide();
-    };
-
-    $scope.cancel = function () {
-      $mdDialog.cancel();
-    };
-
-    $scope.answer = function (answer) {
-      $mdDialog.hide(answer);
-    };
-
+  .controller('dialogController', function ($scope, $rootScope, $mdDialog, PkuyLink) {
 
     //TODO: Pasar a PKuy.js!
-    $scope.importarContactos = function (contactos) {
+    $scope.importarContactos = async function (contactos) {
       selContactos = contactos.filter(contacto => contacto.selected && !contacto.cliID);
       if (!selContactos.length) {
         alert('No se seleccionaron Contactos');
         return;
       }
-      const contacto = selContactos.shift();
-      let nuevaDireccion = new cl_direccion({
-        tel: contacto.telefono,
-        email: contacto.email
-      });
-      PkuyApp.appendObjToSheetTable(nuevaDireccion, cl_maestroDirecciones.sheetName(), true, function (dirUpdatedData) {
-        // importarContactos.appendDir.callback
+      $rootScope.lo();
+      
+      while (selContactos.length !== 0) {
+        const contacto = selContactos.shift();
+        
         let nuevoCliente = new cl_cliente({
           nombre: contacto.nombre,
-          dirID: dirUpdatedData.values[0][0],
           resourceName: contacto.resourceName
         });
-        PkuyApp.appendObjToSheetTable(nuevoCliente, cl_maestroClientes.sheetName(), true, function (cliUpdatedData) {
-          // importarContactos.appendCli.callback
-          PkuyApp.log('Cliente Nro.' + cliUpdatedData.values[0][0] + ' creado con dirección ' + dirUpdatedData.values[0][0]);
-          if (selContactos.length)
-            $scope.importarContactos(selContactos);
-          else {
-            PkuyApp.log("Importación de Clientes desde Google Contactos: Finalizada")
-            $mdDialog.hide();
-          }
-        })
-      });
+        
+        let nuevaDireccion = new cl_direccion({
+          tel: contacto.telefono,
+          email: contacto.email
+        });
+        
+        var clienteCreado = await PkuyLink.nuevoCliente(nuevoCliente, nuevaDireccion);
+        PkuyLink.log('Cliente Nro.' + clienteCreado.cliID + ' creado con dirección ' + clienteCreado.dirID);
+      }
+      
+      PkuyLink.log("Importación de Clientes desde Google Contactos: Finalizada")
+      
+      $rootScope.slo();
+      $mdDialog.hide();
     }
-
+    
+    $scope.mode = 'Contactos de Google';
+    $scope.titulo = 'Importar Clientes';
+    $scope.contactos = [];
 
     $scope.toggleSelectAll = function () {
       $scope.contactos.forEach(element => {
@@ -129,14 +152,9 @@ angular.module('PkuyApp', ['ngMaterial'])
       });
     }
 
-    $scope.mode = 'Visualizando';
-    $scope.titulo = 'Importar Clientes';
-    $scope.currentUser = PkuyApp.currentUser;
-    $scope.contactos = [];
-
-    // PkuyApp.contactos.forEach(function (contacto, index)
-    for (let index = 0; index < PkuyApp.contactos.length; index++) {
-      const contacto = PkuyApp.contactos[index];
+    // PkuyLink.contactos.forEach(function (contacto, index)
+    for (let index = 0; index < PkuyLink.contactos.length; index++) {
+      const contacto = PkuyLink.contactos[index];
       let nuevoContacto = new Object();
       nuevoContacto.index = index;
       nuevoContacto.selected = false;
@@ -149,7 +167,7 @@ angular.module('PkuyApp', ['ngMaterial'])
         (nuevoContacto.nombre == '' && nuevoContacto.telefono != '' && nuevoContacto.email == '') ||
         (nuevoContacto.nombre == '' && nuevoContacto.telefono == '' && nuevoContacto.email != '')) continue;
       $scope.contactos.push(nuevoContacto);
-      if (PkuyApp.testMode && $scope.contactos.length > 20) break; // TEST!!!
+      if (PkuyLink.testMode && $scope.contactos.length > 20) break; // TODO TEST!!!
     };
 
   });
