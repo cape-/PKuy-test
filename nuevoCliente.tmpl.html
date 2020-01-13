@@ -1,0 +1,134 @@
+<md-dialog flex="66">
+    <div layout="column" ng-cloak class="md-inline-form">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>{{ titulo }}</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon aria-label="Close dialog">close</md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+
+        <md-dialog-content>
+            <md-content layout-padding>
+                <div>
+                    <form ng-cloak name="crearNuevoCliente">
+                        <h4>Datos Personales</h4>
+                        <div layout-gt-sm="row">
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>Nombre</label>
+                                <input required name="nombre" ng-model="nuevoCliente.nombre" type="text">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>Apellido</label>
+                                <input ng-model="nuevoCliente.apellido" type="text">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>Punto de Despacho habitual</label>
+                                <md-select ng-model="nuevoCliente.ptoDespachoID_default">
+                                    <md-option ng-repeat="ptoDespacho in maestroPtosDespacho"
+                                        value="{{ptoDespacho.ptoDespachoID}}">
+                                        {{ptoDespacho.nombrePtoDespacho}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                        </div>
+                        <div layout-gt-sm="row">
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>e-mail</label>
+                                <input ng-model="nuevaDireccion.email" type="email">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm="20">
+                                <label>Teléfono</label>
+                                <input ng-model="nuevaDireccion.tel" type="tel">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm="45">
+                                <label>Facebook / Instagram / Red Social</label>
+                                <input ng-model="nuevaDireccion.redSocial" type="tel">
+                            </md-input-container>
+                        </div>
+                        <div layout-gt-sm="row">
+                            <md-input-container class="md-block" flex-gt-sm="30">
+                                <label>Medio de Pago habitual</label>
+                                <md-select ng-model="nuevoCliente.medioPago_default">
+                                    <md-option ng-repeat="medioPago in maestroMediosPago"
+                                        value="{{medioPago.medioPagoID}}">
+                                        {{medioPago.descripcion}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            <md-input-container flex-gt-sm="25" class="md-block">
+                                <label>Descuento de cliente</label>
+                                <md-select ng-model="nuevoCliente.descuento_default">
+                                    <md-option ng-repeat="descuento in descuentos" value="{{descuento}}">
+                                        {{descuento}}%
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                            <md-input-container flex-gt-sm class="md-block">
+                                <label>Grupo de Clientes</label>
+                                <md-select ng-model="nuevoCliente.grClientes">
+                                    <md-option ng-repeat="grClientes in gruposClientes"
+                                        value="{{ grClientes.grCliID }}">
+                                        {{ grClientes.descripcion }}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                        </div>
+                        <h5>Dirección</h5>
+                        <div layout-gt-sm="row">
+                            <md-input-container class="md-block" flex-gt-sm="60">
+                                <label>Calle</label>
+                                <input ng-model="nuevaDireccion.dirCalle" type="text">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>Nro.</label>
+                                <input ng-model="nuevaDireccion.dirNum" type="number">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>Piso</label>
+                                <input ng-model="nuevaDireccion.dirPiso" type="text">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm="20">
+                                <label>Dpto.</label>
+                                <input ng-model="nuevaDireccion.dirDpto" type="text">
+                            </md-input-container>
+                        </div>
+                        <div layout-gt-sm="row">
+                            <md-input-container class="md-block" flex-gt-sm="15">
+                                <label>CP</label>
+                                <input ng-model="nuevaDireccion.dirCP" type="text">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm="40">
+                                <label>Localidad/Barrio</label>
+                                <input ng-model="nuevaDireccion.localidadBarrio" type="text">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>Partido</label>
+                                <input ng-model="nuevaDireccion.partido" type="text">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>Provincia</label>
+                                <input ng-model="nuevaDireccion.provincia" type="text">
+                            </md-input-container>
+                        </div>
+                        <md-dialog-actions layout="row">
+                            <span flex></span>
+                            <md-button class="" ng-click="guardarModelo()">
+                                GUARDAR MODELO
+                            </md-button>
+                            <md-button class="" ng-click="cargarModelo()">
+                                CARGAR MODELO
+                            </md-button>
+                            <md-button class="md-raised md-accent" type="submit"
+                                ng-click="crearCliente(nuevoCliente, nuevaDireccion)">
+                                CREAR
+                            </md-button>
+                        </md-dialog-actions>
+                    </form>
+                </div>
+            </md-content>
+        </md-dialog-content>
+    </div>
+</md-dialog>

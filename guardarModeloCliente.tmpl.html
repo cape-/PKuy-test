@@ -1,0 +1,32 @@
+<md-dialog flex="33">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>{{ titulo }}</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="cancel()">
+                <md-icon aria-label="Close dialog">close</md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <md-content layout-padding>
+            <div>
+                <form ng-cloak name="guardarModelo">
+                    <h4>Nuevo Modelo de Cliente</h4>
+                    <div layout-gt-sm="row">
+                        <md-input-container class="md-block" flex-gt-sm>
+                            <label>Nombre de Modelo</label>
+                            <input required name="nombreModelo" ng-model="nombreModelo" type="text">
+                        </md-input-container>
+                    </div>
+                    <md-dialog-actions layout="row">
+                        <span flex></span>
+                        <md-button class="" type="submit" ng-click="guardar()">
+                            GUARDAR
+                        </md-button>
+                    </md-dialog-actions>
+                </form>
+            </div>
+        </md-content>
+    </md-dialog-content>
+</md-dialog>

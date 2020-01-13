@@ -9,8 +9,10 @@ var PkuyApp = {
   localStorageName: 'PkuyDB',
   defaultSheetRows: 10000,
   defaultContactsPerCall: 1000,
+  icon: "pkuy-icon-1x.png",
   consolaDiv: document.getElementById('consolaDiv'),
   dbBackupNombre: 'PkuyDB_backup_',
+  descuentos: ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90"],
 
   updateSigninStatus: function (isSignedIn) {
     PkuyApp.gapiSignedIn = isSignedIn;
@@ -86,7 +88,7 @@ var PkuyApp = {
       PkuyApp.authUser.nombreCompleto = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
 
       //  Determinar si hay backup en localStorage
-      var localStorageDB = JSON.parse(window.localStorage.getItem('' + PkuyApp.localStorageName));
+      var localStorageDB = PkuyApp.loadLocalDB();
 
       if (localStorageDB && (localStorageDB.ts >= (Date.now() - 3600000))) {
         // Si hay y su TS < 1 hora >>> Recuperar DB desde localStorage
@@ -215,7 +217,7 @@ var PkuyApp = {
             // Backup en localStorage
             PkuyApp.log("Backup to localStorage");
             PkuyApp.db.ts = Date.now();
-            window.localStorage.setItem('' + PkuyApp.localStorageName, JSON.stringify(PkuyApp.db));
+            PkuyApp.saveLocalDB();
 
             // AngularJS callback
             PkuyApp.onLoaded();
@@ -224,6 +226,14 @@ var PkuyApp = {
 
       }
     });
+  },
+
+  saveLocalDB: async function () {
+    window.localStorage.setItem('' + PkuyApp.localStorageName, JSON.stringify(PkuyApp.db));
+  },
+
+  loadLocalDB: function () {
+    return JSON.parse(window.localStorage.getItem('' + PkuyApp.localStorageName));
   },
 
   initPkuyDB: function (data) {
@@ -351,8 +361,10 @@ var PkuyApp = {
 
   cruzarClientesContactos: function (contactos, maestroClientes) {
     // Match Contactos de Google con Clientes de PkuyApp
-    for (let index = 0; index < maestroClientes.recordSet.length; index++) {
-      const cliente = maestroClientes.recordSet[index];
+    listaClientes = maestroClientes.getClientes();
+
+    for (let index = 0; index < listaClientes.length; index++) {
+      const cliente = listaClientes[index];
       if (cliente.resourceName == '' || cliente.resourceName == undefined) continue;
       for (let index2 = 0; index2 < contactos.length; index2++) {
         const contacto = contactos[index2];
@@ -563,26 +575,6 @@ var PkuyApp = {
     return obj;
   },
 
-  consola: function () {
-    if (console._log != undefined) return;
-    if (typeof console != undefined)
-      if (typeof console.log != undefined)
-        console._log = console.log;
-      else
-        console._log = function () { };
-
-    console.log = function (message) {
-      console._log(message);
-      var consolaDiv = document.getElementById('consolaDiv');
-      consolaDiv.insertBefore(document.createElement('br'), consolaDiv.firstChild);
-      consolaDiv.insertBefore(document.createTextNode(message), consolaDiv.firstChild);
-      // consolaDiv.appendChild(document.createTextNode(message));
-
-      // consolaDiv.appendChild(document.createElement("br"));
-    };
-    console.error = console.debug = console.info = console.log;
-  },
-
   updateStockDiario: function () {
     // 1. Get stock corriente (tabla stock_01)
     // 2. Sumarizar por Producto/Depósito
@@ -639,13 +631,21 @@ var PkuyApp = {
   },
 
   nuevoCliente: async function (nuevoCliente, nuevaDireccion) {
-
+    console.debug("nuevoCliente called")
     await PkuyApp.appendObjToSheetTable(nuevaDireccion, cl_maestroDirecciones.sheetName(), true,
-      (newID) => nuevoCliente.dirID = newID);
+      (newID) => nuevaDireccion.dirID = nuevoCliente.dirID = newID);
 
     await PkuyApp.appendObjToSheetTable(nuevoCliente, cl_maestroClientes.sheetName(), true,
       (newID) => nuevoCliente.cliID = newID);
 
+    PkuyApp.db.maestroClientes.add(nuevoCliente);
+    PkuyApp.db.maestroDirecciones.add(nuevaDireccion);
+    PkuyApp.saveLocalDB();
+
+    PkuyApp.notificacion('Cliente Creado', false, 'El Cliente ' + nuevoCliente.cliID
+      + ' (' + nuevoCliente.nombre + ' ' + nuevoCliente.apellido + ') ha sido creado correctamente!\n'
+      + 'Su dirección es la número ' + nuevoCliente.dirID + '.');
+    PkuyApp.log('Cliente Nro.' + nuevoCliente.cliID + ' creado con dirección ' + nuevoCliente.dirID);
     return nuevoCliente;
 
   },
@@ -671,9 +671,13 @@ var PkuyApp = {
     PkuyApp.logView(msgObj);
   },
 
+  upTime: function () {
+    return Date.now() - PkuyApp.startUpTS;
+  },
+
   constructMsgObj: function (message, msgType) {
     return {
-      time: Date.now() - PkuyApp.startUpTS,
+      time: PkuyApp.upTime(),
       type: msgType,
       msg: message,
       presentar: function () { return '[' + this.time + '] ' + this.type + ' > ' + this.msg }
@@ -722,6 +726,17 @@ var PkuyApp = {
 
     PkuyApp.cabs[tableName] = cab;
     return cab;
+  },
+
+  notificacion: async function (titulo, esperarCierre, cuerpo) {
+    console.debug("notificacion");
+    new Notification(titulo, {
+      "body": cuerpo,
+      "tag": "PkuyNotif_" + PkuyApp.upTime(),
+      "icon": PkuyApp.icon,
+      "renotify": 'false',
+      "requireInteraction": esperarCierre ? 'true' : 'false'
+    });
   },
 
   // TODO: Borrar!

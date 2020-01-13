@@ -10,6 +10,11 @@ html, body {
     right: 30px;
 }
 
+i.material-icons.icon-big
+{
+    font-size: 48px;
+}
+
 md-icon.contacto-icon {
     color: #6B4;
     font-size: 48px;
@@ -24,7 +29,8 @@ md-icon.cliente-icon {
     width: auto
 }
 
-div.PkuyConsola {
+.PkuyConsola {
+    border-top: solid 1px #202020;
     background-color: #222;
     position: fixed;
     width: 100%;
@@ -37,42 +43,46 @@ div.PkuyConsola {
     transition: max-height 0.5s ease-out;
 }
 
-div.PkuyConsola:hover {
+.PkuyConsola:hover {
     max-height: 30%;
     overflow: auto;
     transition: max-height 0.25s ease-in;
 }
 
-div.PkuyConsola div {
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-div.PkuyConsola div.userDataContainer {
+.PkuyConsola div.userDataContainer {
     color: burlywood;
 }
 
-div.PkuyConsola div.tituloContainer span {
+.PkuyConsola div.tituloContainer span {
     font-weight: bolder;
     color: coral;
     margin: 0 16px 0 6px;
 }
 
-div.PkuyConsola div.consolaContainer span {
+.PkuyConsola div.consolaContainer span {
     display: block;
     color: mediumseagreen;
 }
 
-div.PkuyConsola div.consolaContainer span:hover {
+.PkuyConsola div.consolaContainer span:hover {
     background-color: #233;
 }
 
-div.PkuyConsola div.consolaContainer span.warn {
+.PkuyConsola div.consolaContainer span.warn {
     display: block;
     color: gold;
 }
 
-div.PkuyConsola div.consolaContainer span.error {
+.PkuyConsola div.consolaContainer span.error {
     color: crimson;
     text-decoration: underline dotted;
+}
+
+md-input-container.md-block{
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+div.md-input-message-animation{
+    margin-bottom: 18px;
 }

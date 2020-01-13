@@ -1,4 +1,4 @@
-<html lang="en">
+<html lang="es-419">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -17,10 +17,10 @@
 
 <body ng-app="PkuyApp" ng-cloak>
     <div ng-controller="main" flex>
-        <md-toolbar class="md-menu-toolbar">
+        <md-toolbar class="md-menu-toolbar" ng-cloak>
             <div layout="row">
                 <md-toolbar-filler layout layout-align="center center">
-                    <i class="material-icons">business</i>
+                    <i class="material-icons icon-big">blur_on</i>
                 </md-toolbar-filler>
                 <div>
                     <h2 class="md-toolbar-tools">PkuyApp</h2>
@@ -63,16 +63,16 @@
         </div> -->
         <!-- CONSOLA -->
         <md-content layout="row" layout-align="start center" layout-padding>
-            <p class="">PkuyApp Log</p>
+            <!-- <p class="">PkuyApp Log</p>
             <h5>Off</h5>
             <md-switch ng-model="pkuyLoading" aria-label="Toggle Progress Circular Indicators">
                 <h5>On</h5>
-            </md-switch>
+            </md-switch> -->
         </md-content>
 
-        <div class="PkuyConsola" layout="row">
-            <div class="tituloContainer">
-                <span>PkuyApp Log &rarr;</span>
+        <md-content class="PkuyConsola" layout="row">
+            <div class="tituloContainer md-secondary">
+                <span class="md-caption">PkuyApp Log &rarr;</span>
                 <md-tooltip>La <b>Consola</b> permite tener registro de las actividades del sistema</md-tooltip>
                 </pre>
             </div>
@@ -81,7 +81,7 @@
             <div class="userDataContainer">
                 {{ currentUser.nombre + ' (' + currentUser.email + ')'}}
             </div>
-        </div>
+        </md-content>
 
     </div>
 

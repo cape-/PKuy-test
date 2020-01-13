@@ -1,0 +1,22 @@
+<md-dialog flex="33">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>{{ titulo }}</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="cancel()">
+                <md-icon aria-label="Close dialog">close</md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <md-content layout-padding>
+            <div>
+                <h4>Seleccioná el modelo</h4>
+                <div ng-repeat="modelo in modelos track by $index">
+                    <md-button ng-click="usarModelo($index)">{{ modelo.esModelo }}</md-button>
+                </div>
+            </div>
+        </md-content>
+
+    </md-dialog-content>
+</md-dialog>

@@ -24,7 +24,10 @@ class cl_cliente extends PKuyObj_base {
   dirID;
   ptoDespachoID_default;
   medioPago_default;
+  descuento_default;
+  grClientes;
   resourceName;
+  esModelo;
 
   constructor(dataIn) {
     super(dataIn);
@@ -168,7 +171,7 @@ class cl_ptoDespacho extends PKuyObj_base {
 
 /* CLASE MEDIO DE PAGO */
 class cl_medioPago extends PKuyObj_base {
-  medioPago;
+  medioPagoID;
   descripcion;
 
   constructor(dataIn) {
@@ -177,7 +180,7 @@ class cl_medioPago extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.medioPago;
+    this.key = this.medioPagoID;
   }
 }
 
@@ -302,6 +305,7 @@ class cl_direccion {
   dirID_modelo;
   tel;
   email;
+  redSocial;
   dirCalle;
   dirNum;
   dirPiso;
@@ -365,9 +369,23 @@ class cl_maestroClientes {
     this.recordSet = new Array();
     var cliente_data;
     for (cliente_data in tableData) {
-      this.recordSet.push(new cl_cliente(tableData[cliente_data]));
+      this.add(new cl_cliente(tableData[cliente_data]));
     }
   }
+  add(cliente) {
+    if ((cliente.cliID === undefined) || (cliente.cliID === ''))
+      throw "Error: Cliente: falta cliID";
+    this.recordSet.push(cliente);
+  }
+
+  getModelos() {
+    return this.recordSet.filter(cliente => cliente.esModelo);
+  }
+
+  getClientes() {
+    return this.recordSet.filter(cliente => !cliente.esModelo);
+  }
+
   getByApellido(queryApellido) {
     return this.recordSet.find((cliente) => cliente.apellido.toLowerCase() == queryApellido.toLowerCase());
   }
@@ -392,6 +410,9 @@ class cl_maestroPedidos {
   getByProdID(queryProdID) {
     return this.recordSet.filter((pedido) => pedido.prodID == queryProdID);
   }
+  getAll(){
+    return this.recordSet;
+  }
 }
 
 /* CLASE MAESTRO DE STATUS DE PEDIDOS */
@@ -403,6 +424,9 @@ class cl_statusPedidos {
     for (statusPedido_data in tableData) {
       this.recordSet.push(new cl_statusPedido(tableData[statusPedido_data]));
     }
+  }
+  getAll(){
+    return this.recordSet;
   }
 }
 
@@ -416,6 +440,9 @@ class cl_tiposStatusPedido {
       this.recordSet.push(new cl_tipoStatusPedido(tableData[tipoStatusPedido_data]));
     }
   }
+  getAll(){
+    return this.recordSet;
+  }
 }
 
 /* CLASE MAESTRO DE ALMACENES */
@@ -427,6 +454,9 @@ class cl_maestroAlmacenes {
     for (almacen_data in tableData) {
       this.recordSet.push(new cl_almacen(tableData[almacen_data]));
     }
+  }
+  getAll(){
+    return this.recordSet;
   }
 }
 
@@ -440,6 +470,9 @@ class cl_maestroPtosDespacho {
       this.recordSet.push(new cl_ptoDespacho(tableData[ptoDespacho_data]));
     }
   }
+  getAll(){
+    return this.recordSet;
+  }
 }
 
 /* CLASE MAESTRO DE MEDIOS DE PAGO */
@@ -451,6 +484,9 @@ class cl_maestroMediosPago {
     for (medioPago_data in tableData) {
       this.recordSet.push(new cl_medioPago(tableData[medioPago_data]));
     }
+  }
+  getAll(){
+    return this.recordSet;
   }
 }
 
@@ -466,6 +502,9 @@ class cl_maestroProductos {
   }
   getByProdID(prodID) {
   }
+  getAll(){
+    return this.recordSet;
+  }
 }
 
 /* CLASE MAESTRO DE PRECIOS */
@@ -477,6 +516,9 @@ class cl_maestroPrecios {
     for (productoPrecio_data in tableData) {
       this.recordSet.push(new cl_precioProducto(tableData[productoPrecio_data]));
     }
+  }
+  getAll(){
+    return this.recordSet;
   }
 }
 
@@ -490,6 +532,9 @@ class cl_tiposPrecios {
       this.recordSet.push(new cl_tipoPrecio(tableData[tipoPrecio_data]));
     }
   }
+  getAll(){
+    return this.recordSet;
+  }
 }
 
 /* CLASE MAESTRO DE MOVIMIENTOS DE MATERIAL */
@@ -501,6 +546,9 @@ class cl_maestroMovimientos {
     for (movimientos_data in tableData) {
       this.recordSet.push(new cl_movMaterial(tableData[movimientos_data]));
     }
+  }
+  getAll(){
+    return this.recordSet;
   }
 }
 
@@ -514,6 +562,9 @@ class cl_tiposMovimiento {
       this.recordSet.push(new cl_tipoMovMat(tableData[tiposMovimiento_data]));
     }
   }
+  getAll(){
+    return this.recordSet;
+  }
 }
 
 /* CLASE MAESTRO DE CALCULOS DE STOCK */
@@ -526,6 +577,9 @@ class cl_maestroCalculosStock {
       this.recordSet.push(new cl_calculoStock(tableData[calculosStock_data]));
     }
   }
+  getAll(){
+    return this.recordSet;
+  }
 }
 
 /* CLASE MAESTRO DE DIRECCIONES */
@@ -535,12 +589,22 @@ class cl_maestroDirecciones {
     this.recordSet = new Array();
     var direccion_data;
     for (direccion_data in tableData) {
-      this.recordSet.push(new cl_direccion(tableData[direccion_data]));
+      this.add(new cl_direccion(tableData[direccion_data]));
     }
   }
-  getByID(dirID) {
+  getAll(){
+    return this.recordSet;
+  }
+  getByID(queryDirID) {
+    return this.recordSet.find(direccion => direccion.dirID == queryDirID);
+  }
+  add(direccion) {
+    if ((direccion.dirID === undefined) || (direccion.dirID === ''))
+      throw "Error: Direccion: falta dirID";
+    this.recordSet.push(direccion);
   }
 }
-
+// gr.Clientes
+// cotizacion
 // contabilizacion
 // balance
