@@ -605,6 +605,7 @@ class cl_maestroDirecciones {
   }
 }
 // gr.Clientes
+// unidades de medida
 // cotizacion
 // contabilizacion
 // balance

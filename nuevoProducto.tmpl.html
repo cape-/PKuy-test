@@ -1,0 +1,77 @@
+<md-dialog flex="66">
+    <div layout="column" ng-cloak class="md-inline-form">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>{{ titulo }}</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon aria-label="Close dialog">close</md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+
+        <md-dialog-content>
+            <md-content layout-padding>
+                <div>
+                    <form ng-cloak name="crearNuevoProducto">
+                        <h4>Datos del Producto</h4>
+                        <div layout-gt-sm="row">
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>Descripción</label>
+                                <input required name="descripcion" ng-model="nuevoProducto.descripcion" type="text">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm="20">
+                                <label>Unidad de Medida</label>
+                                <md-select ng-model="nuevoProducto.UM">
+                                    <md-option ng-repeat="unidad in unidades" value="{{unidad.UM}}">
+                                        {{unidad.descripcionUM}}
+                                    </md-option>
+                                </md-select>
+                            </md-input-container>
+                        </div>
+                        <h5>Presentaciones</h5>
+                        <div layout-gt-sm="row">
+                            <table flex-gt-sm>
+                                <thead>
+                                    <tr>
+                                        <th>Denominacion</th>
+                                        <th>Cant.</th>
+                                        <th>UM</th>
+                                        <th>Precio</th>
+                                        <th>Moneda</th>
+                                        <th>Tipo de Precio</th>
+                                        <th>Precio Calculado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="presentacion in presentaciones">
+                                        <td><input required name="denominacionPresentacion" ng-model="presentacion.denominacion" type="text"></td>
+                                        <td><input required name="cantPresentacion" ng-model="presentacion.cantPresentacion" type="number"></td>
+                                        <td><input required name="UMPresentacion" ng-model="nuevoProducto.UM" type="text" disabled></td>
+                                        <td><input required name="precioPresentacion" ng-model="presentacion.precio" type="number"></td>
+                                        <td><input required name="monedaPresentacion" ng-model="presentacion.moneda" type="text" disabled></td>
+                                        <td><input required name="tipoPrecioPresentacion" ng-model="presentacion.tipoPrecio" type="text"></td>
+                                        <td><input required name="precioCalculadoPresentacion" ng-model="presentacion.precioCalculado" type="number" disabled></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <md-dialog-actions layout="row">
+                            <span flex></span>
+                            <md-button class="" ng-click="quitarPresentacion()">
+                                -
+                            </md-button>
+                            <md-button class="" ng-click="agregarPresentacion()">
+                                +
+                            </md-button>
+                            <md-button class="md-raised md-accent" type="submit"
+                                ng-click="crearProducto(nuevoProducto, nuevaDireccion)">
+                                CREAR
+                            </md-button>
+                        </md-dialog-actions>
+                    </form>
+                </div>
+            </md-content>
+        </md-dialog-content>
+    </div>
+</md-dialog>

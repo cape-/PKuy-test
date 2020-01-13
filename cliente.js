@@ -59,7 +59,8 @@ angular.module('PkuyApp', ['ngMaterial'])
       {
         titulo: '2.Crear',
         entradas: [
-          { titulo: 'Nuevo Cliente', do: function () { $scope.crearNuevoCliente(true) } },
+          { titulo: 'Nuevo Cliente', do: function () { $scope.crearNuevoCliente() } },
+          { titulo: 'Nuevo Producto', do: function () { $scope.crearNuevoProducto() } },
         ]
       },
       {
@@ -142,6 +143,23 @@ angular.module('PkuyApp', ['ngMaterial'])
 
     }
 
+    /** Abrir Diálogo para crear Nuevo Producto */
+    $scope.crearNuevoProducto = async function (ev) {
+      $mdDialog.show({
+        controller: 'dialogCrearNuevoProducto',
+        templateUrl: 'nuevoProducto.tmpl.html',
+        parent: angular.element(document.body),
+        targetEvent: ev,
+        clickOutsideToClose: true,
+        fullscreen: false
+      })
+        .then(function (answer) {
+        })
+        .catch(function () {
+        });
+
+    }
+
   })
 
   /** Controlador del Diálogo para Impoartar Clientes */
@@ -210,7 +228,7 @@ angular.module('PkuyApp', ['ngMaterial'])
   })
 
   /** Controlador del Diálogo para crear un Nuevo Cliente */
-  .controller('dialogCrearNuevoCliente', function ($scope, PkuyLink, $rootScope, $mdDialog, PkuyLink) {
+  .controller('dialogCrearNuevoCliente', function ($scope, $rootScope, $mdDialog, PkuyLink) {
     $scope.titulo = "Crear nuevo Cliente"
     $scope.nuevoCliente = new cl_cliente();
     $scope.nuevaDireccion = new cl_direccion();
@@ -302,5 +320,34 @@ angular.module('PkuyApp', ['ngMaterial'])
         $scope.nuevaDireccion = new cl_direccion();
       }).catch(() => { });
     };
+
+  })
+
+  /** Controlador del Diálogo para crear un Nuevo Producto */
+  .controller('dialogCrearNuevoProducto', function ($scope, PkuyLink, $rootScope, $mdDialog) {
+    $scope.titulo = "Alta nuevo Producto"
+    $scope.nuevoProducto = new cl_producto();
+    $scope.presentaciones = [{'denominacion':'nuevo'}];
+    $scope.unidades = [{ "UM": "Un.", "descripcionUM": "Unidades" },
+    { "UM": "Paq.", "descripcionUM": "Paquetes" },
+    { "UM": "Kg", "descripcionUM": "Kilogramos" },
+    { "UM": "Gr", "descripcionUM": "Gramos" },
+    { "UM": "Ml", "descripcionUM": "Mililitros" },
+    { "UM": "Lts", "descripcionUM": "Litros" }];
+    /** Cerrar Diálogo */
+    $scope.cancel = () => $mdDialog.cancel();
+
+    $scope.agregarPresentacion = () => $scope.presentaciones.push(new Object());
+    $scope.quitarPresentacion = () => $scope.presentaciones.shift();
+
+    /** Clic en Crear */
+    $scope.crearProducto = async function (nuevoCli, nuevaDir) {
+      $rootScope.lo();
+      var ProductoCreado = await PkuyLink.nuevoProducto(nuevoCli, nuevaDir);
+      $rootScope.slo();
+      $mdDialog.hide();
+
+    }
+
 
   })
