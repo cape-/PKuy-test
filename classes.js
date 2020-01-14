@@ -188,6 +188,7 @@ class cl_medioPago extends PKuyObj_base {
 class cl_producto extends PKuyObj_base {
   prodID;
   descripcion;
+  origen;
   prodID_modelo;
   esModelo;
   cantPresentacion;
@@ -228,6 +229,7 @@ class cl_precioProducto extends PKuyObj_base {
 class cl_tipoPrecio extends PKuyObj_base {
   tipoPrecio;
   nombreTipoPrecio;
+  moneda;
 
   constructor(dataIn) {
     super(dataIn);

@@ -147,7 +147,7 @@ angular.module('PkuyApp', ['ngMaterial'])
     $scope.crearNuevoProducto = async function (ev) {
       $mdDialog.show({
         controller: 'dialogCrearNuevoProducto',
-        templateUrl: 'nuevoProducto.tmpl.html',
+        templateUrl: 'nuevoProducto.tmpl.html?v=12',
         parent: angular.element(document.body),
         targetEvent: ev,
         clickOutsideToClose: true,
@@ -326,19 +326,36 @@ angular.module('PkuyApp', ['ngMaterial'])
   /** Controlador del Diálogo para crear un Nuevo Producto */
   .controller('dialogCrearNuevoProducto', function ($scope, PkuyLink, $rootScope, $mdDialog) {
     $scope.titulo = "Alta nuevo Producto"
-    $scope.nuevoProducto = new cl_producto();
-    $scope.presentaciones = [{'denominacion':'nuevo'}];
+    $scope.nuevoProducto = {
+      'descripcion': '',
+      'origen': '',
+      'UM': '',
+      'precioReferencia': '0.00',
+      'tipoPrecio': '',
+    };
+    $scope.nuevaPresentacion = {
+      'denominacion': '',
+      'cantPresentacion': '0.00',
+      'UM': '',
+      'precio': '0.00',
+      'moneda': '',
+      'tipoPrecio': '',
+      'precioCalculado': '0.00'
+    };
+    $scope.presentaciones = [];
+    $scope.presentaciones.push(Object.assign({}, $scope.nuevaPresentacion));
     $scope.unidades = [{ "UM": "Un.", "descripcionUM": "Unidades" },
     { "UM": "Paq.", "descripcionUM": "Paquetes" },
     { "UM": "Kg", "descripcionUM": "Kilogramos" },
     { "UM": "Gr", "descripcionUM": "Gramos" },
     { "UM": "Ml", "descripcionUM": "Mililitros" },
     { "UM": "Lts", "descripcionUM": "Litros" }];
+    $scope.tiposPrecio = PkuyLink.db.tiposPrecios.getAll();
     /** Cerrar Diálogo */
     $scope.cancel = () => $mdDialog.cancel();
 
-    $scope.agregarPresentacion = () => $scope.presentaciones.push(new Object());
-    $scope.quitarPresentacion = () => $scope.presentaciones.shift();
+    $scope.agregarPresentacion = () => $scope.presentaciones.push(Object.assign({}, $scope.nuevaPresentacion));
+    $scope.quitarPresentacion = () => $scope.presentaciones.pop();
 
     /** Clic en Crear */
     $scope.crearProducto = async function (nuevoCli, nuevaDir) {

@@ -3,6 +3,10 @@ html, body {
     font-family: Google Sans, Noto Sans, sans-serif;
 }
 
+form {
+    margin-bottom: 0;
+}
+
 #loadingCircle{
     position: fixed;
     z-index: 99;
@@ -82,7 +86,37 @@ md-input-container.md-block{
     margin-top: 0px;
     margin-bottom: 0px;
 }
+.md-table-input {
+    background-color: #333;
+    border: solid 1px #222;
+    border-radius: 5px;
+    height: 1.8em;
+    color: #fff;
+    padding: 0 6px;
+}
 
 div.md-input-message-animation{
     margin-bottom: 18px;
+}
+
+table {
+    table-layout: fixed;
+    width: 100%;
+}
+/* tbody{
+} */
+tr{
+    display: flex;
+    flex-flow: row;    
+}
+td, th {
+    flex: 1 1 100px;
+}
+input, select{
+    display: inline;
+    width: 100%;
+}
+div.table-scroll-div{
+    height: 150px;
+    overflow: auto;
 }
