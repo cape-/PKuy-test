@@ -147,7 +147,7 @@ angular.module('PkuyApp', ['ngMaterial'])
     $scope.crearNuevoProducto = async function (ev) {
       $mdDialog.show({
         controller: 'dialogCrearNuevoProducto',
-        templateUrl: 'nuevoProducto.tmpl.html?v=12',
+        templateUrl: 'nuevoProducto.tmpl.html',
         parent: angular.element(document.body),
         targetEvent: ev,
         clickOutsideToClose: true,
@@ -330,17 +330,17 @@ angular.module('PkuyApp', ['ngMaterial'])
       'descripcion': '',
       'origen': '',
       'UM': '',
-      'precioReferencia': '0.00',
+      'precioReferencia': 1.00,
       'tipoPrecio': '',
     };
     $scope.nuevaPresentacion = {
       'denominacion': '',
-      'cantPresentacion': '0.00',
+      'cantPresentacion': 1.00,
       'UM': '',
-      'precio': '0.00',
+      'precio': 1.00,
       'moneda': '',
       'tipoPrecio': '',
-      'precioCalculado': '0.00'
+      'precioCalculado': 1.00
     };
     $scope.presentaciones = [];
     $scope.presentaciones.push(Object.assign({}, $scope.nuevaPresentacion));
@@ -366,5 +366,8 @@ angular.module('PkuyApp', ['ngMaterial'])
 
     }
 
+    $scope.calcularPrecioPresentacion = async function(index) {
+      console.log($scope.presentaciones[index]);
+    }
 
   })

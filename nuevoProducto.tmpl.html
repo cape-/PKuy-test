@@ -94,13 +94,13 @@
                                                 <input class="md-table-input" required name="cantPresentacion"
                                                     ng-model="presentacion.cantPresentacion" type="number" step=".01">
                                             </td>
-                                            <td flex-gt-sm="5">
+                                            <td flex-gt-sm="10">
                                                 <input class="md-table-input" required name="UMPresentacion"
                                                     ng-model="nuevoProducto.UM" type="text" disabled>
                                             </td>
                                             <td flex-gt-sm="10">
                                                 <input class="md-table-input" required name="precioPresentacion"
-                                                    ng-model="presentacion.precio" type="number" step=".01">
+                                                    ng-model="presentacion.precio" type="number" step=".001">
                                             </td>
                                             <td flex-gt-sm="10">
                                                 <input class="md-table-input" required name="monedaPresentacion"
@@ -118,7 +118,8 @@
                                             <td flex-gt-sm="10">
                                                 <input class="md-table-input" required
                                                     name="precioCalculadoPresentacion"
-                                                    ng-model="presentacion.precioCalculado" type="number" disabled>
+                                                    ng-model="presentacion.precioCalculado" 
+                                                    ng-bind="calcularPrecioPresentacion($index)" type="number" disabled>
                                             </td>
                                         </tr>
                                     </tbody>
