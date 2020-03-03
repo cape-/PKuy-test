@@ -16,6 +16,15 @@
 	4. Editar httpd-vhosts.conf (C:\xampp\apache\conf\extra\httpd-vhosts.conf)
 	
 		<VirtualHost *:80>
+			# Anular Dashboard y demás dominios de XAMPP
+			DocumentRoot /
+			<Directory />
+				AllowOverride none
+				Require all denied
+			</Directory>
+		</VirtualHost>
+
+		<VirtualHost *:80>
 			ServerAdmin laucape@gmail.com
 			DocumentRoot "[\\\ RUTA A PKUYAPP ROOT \\\]"
 			ServerName www.pkuyapp.com
@@ -29,7 +38,8 @@
 			</Directory>
 		</VirtualHost>
 
-	5. Abrir XAMPP en [Modo Administrador] e instalar Apache como Servicio
+	5. Abrir XAMPP en [Modo Administrador] e instalar Apache como Servicio.
+	   Luego abrir "Servicios" (desde XAMPP), buscar Apache - Propiedades - Recovery - Setear "Restart Service" en todas las fallas
 	
 	6. Abrir www.pkuyapp.com en Chrome e ir a "Opciones - Más Herramientas - Crear acceso directo".
-	   Luego renombrar el acceso directo creado en el Escritorio como "PkuyApp"
+	   Luego renombrar el acceso directo creado en el Escritorio como "PkuyApp".

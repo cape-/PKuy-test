@@ -113,7 +113,7 @@ angular.module('PkuyApp', ['ngMaterial'])
       $rootScope.slo();
       $mdDialog.show({
         controller: 'dialogImportarClientes',
-        templateUrl: 'importarClientes.tmpl.html',
+        templateUrl: '/templates/importarClientes.tmpl.html',
         parent: angular.element(document.body),
         targetEvent: ev,
         clickOutsideToClose: true,
@@ -130,7 +130,7 @@ angular.module('PkuyApp', ['ngMaterial'])
     $scope.crearNuevoCliente = async function (ev) {
       $mdDialog.show({
         controller: 'dialogCrearNuevoCliente',
-        templateUrl: 'nuevoCliente.tmpl.html',
+        templateUrl: '/templates/nuevoCliente.tmpl.html',
         parent: angular.element(document.body),
         targetEvent: ev,
         clickOutsideToClose: true,
@@ -147,7 +147,7 @@ angular.module('PkuyApp', ['ngMaterial'])
     $scope.crearNuevoProducto = async function (ev) {
       $mdDialog.show({
         controller: 'dialogCrearNuevoProducto',
-        templateUrl: 'nuevoProducto.tmpl.html',
+        templateUrl: '/templates/nuevoProducto.tmpl.html',
         parent: angular.element(document.body),
         targetEvent: ev,
         clickOutsideToClose: true,
@@ -280,7 +280,7 @@ angular.module('PkuyApp', ['ngMaterial'])
         preserveScope: true,
         autoWrap: true,
         multiple: true,
-        templateUrl: 'cargarModeloCliente.tmpl.html'
+        templateUrl: '/templates/cargarModeloCliente.tmpl.html'
       }).then(function (selCliente) {
         $scope.nuevoCliente = new cl_cliente();
         $scope.nuevaDireccion = new cl_direccion();
@@ -310,7 +310,7 @@ angular.module('PkuyApp', ['ngMaterial'])
         preserveScope: true,
         autoWrap: true,
         multiple: true,
-        templateUrl: 'guardarModeloCliente.tmpl.html'
+        templateUrl: '/templates/guardarModeloCliente.tmpl.html'
       }).then(async function (nombreModelo) {
         $scope.nuevoCliente.esModelo = nombreModelo;
         $rootScope.lo();
