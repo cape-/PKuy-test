@@ -1,0 +1,35 @@
+  PkuyApp ver 1.0
+===============================================================================
+  Lautaro Capella (C) 2019.
+  laucape@gmail.com
+===============================================================================
+  Instalación en Win 10.
+-------------------------------------------------------------------------------
+	1.Instalar XAMPP
+	
+	2. Copiar PkuyApp ROOT
+
+	3.Editar hosts (C:\Windows\System32\drivers\etc\hosts)
+	
+		127.0.0.1 www.pkuyapp.com
+
+	4. Editar httpd-vhosts.conf (C:\xampp\apache\conf\extra\httpd-vhosts.conf)
+	
+		<VirtualHost *:80>
+			ServerAdmin laucape@gmail.com
+			DocumentRoot "[\\\ RUTA A PKUYAPP ROOT \\\]"
+			ServerName www.pkuyapp.com
+			<Directory "[\\\ RUTA A PKUYAPP ROOT \\\]">
+				# AllowOverride All      # Deprecated
+				# Order Allow,Deny       # Deprecated
+				# Allow from all         # Deprecated
+
+				# --New way of doing it
+				Require all granted
+			</Directory>
+		</VirtualHost>
+
+	5. Abrir XAMPP en [Modo Administrador] e instalar Apache como Servicio
+	
+	6. Abrir www.pkuyapp.com en Chrome e ir a "Opciones - Más Herramientas - Crear acceso directo".
+	   Luego renombrar el acceso directo creado en el Escritorio como "PkuyApp"
