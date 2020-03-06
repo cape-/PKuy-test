@@ -73,11 +73,17 @@
             <div class="tituloContainer md-secondary">
                 <span class="md-caption">PkuyApp Log &rarr;</span>
                 <md-tooltip>La <b>Consola</b> permite tener registro de las actividades del sistema</md-tooltip>
-                </pre>
             </div>
             <div class="consolaContainer" id="consolaDiv" flex>
             </div>
-            <div class="userDataContainer">
+            <div class="cotizacionesContainer" ng-show="dolar">
+                {{ 'Oficial: ' + dolar.oficial.venta + ' | Blue:' + dolar.blue.venta  }}
+                <br> {{ 'Oficial Compra: $' + dolar.oficial.compra }}
+                <br> {{ 'Oficial Venta: $' + dolar.oficial.venta }}
+                <br> {{ 'Blue Compra: $' + dolar.blue.compra }}
+                <br> {{ 'Blue Venta: $' + dolar.blue.venta }}
+            </div>
+            <div class="userDataContainer" ng-show="currentUser">
                 {{ currentUser.nombre + ' (' + currentUser.email + ')'}}
             </div>
         </md-content>
@@ -95,10 +101,10 @@
     <script src="/libs/angular_material/1.1.12/angular-material.min.js"></script>
 
     <!-- Google API Library -->
-    <script src="/apis.google.com/js/api.js"></script>
+    <script src="/libs/apis.google.com/js/api.js"></script>
 
     <!-- PkuyApp Credenciales  -->
-    <script src="/pkuyApp_keys.js"></script>
+    <script src="/keys/pkuyApp_keys.js"></script>
     <!-- PkuyApp Core  -->
     <script src="/pkuyAppClasses.js"></script>
     <script src="/pkuyAppCore.js"></script>

@@ -55,6 +55,12 @@ md-icon.cliente-icon {
 
 .PkuyConsola div.userDataContainer {
     color: burlywood;
+    margin-left: 10px;
+}
+
+.PkuyConsola div.cotizacionesContainer {
+    text-align: right;
+    color: palevioletred
 }
 
 .PkuyConsola div.tituloContainer span {

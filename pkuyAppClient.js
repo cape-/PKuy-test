@@ -11,7 +11,12 @@ angular.module('PkuyApp', ['ngMaterial'])
     return PkuyApp;
   })
 
-  .controller('main', function ($scope, $rootScope, $mdDialog, PkuyLink) {
+  /**----------------------------------------------------- */
+  /**                                                      */
+  /** MAIN CONTROLLER                                      */
+  /**                                                      */
+  /**----------------------------------------------------- */
+  .controller('main', function ($scope, $rootScope, $mdDialog, $http, PkuyLink) {
 
     // Obtener Permiso para enviar Notifiaciones
     Notification.requestPermission();
@@ -22,16 +27,21 @@ angular.module('PkuyApp', ['ngMaterial'])
     // Stop Loading
     $rootScope.slo = () => $rootScope.pkuyLoading = false;
 
-    $scope.onLoaded = function () {
+    $scope.onDBLoaded = function () {
       // Actualizar Vista
       $rootScope.currentUser = PkuyLink.currentUser;
       $rootScope.slo();
       $scope.$apply();
     }
+    
+    $scope.onCotizacionesLoaded = function () {
+      $rootScope.dolar = PkuyLink.dolar;
+      $scope.$apply();
+    }
 
     // StartUp
     $rootScope.lo();
-    PkuyLink.startPkuyDB($scope.onLoaded);
+    PkuyLink.startPkuyDB($scope.onDBLoaded, $scope.onCotizacionesLoaded, $http);
 
     // Menus
     $scope.appMenu = [
@@ -162,7 +172,11 @@ angular.module('PkuyApp', ['ngMaterial'])
 
   })
 
-  /** Controlador del Diálogo para Impoartar Clientes */
+  /**----------------------------------------------------- */
+  /**                                                      */
+  /** Controlador del Diálogo para Impoartar Clientes      */
+  /**                                                      */
+  /**----------------------------------------------------- */
   .controller('dialogImportarClientes', function ($scope, $rootScope, $mdDialog, PkuyLink) {
 
     $scope.titulo = 'Importar Contactos de Google';
@@ -227,7 +241,11 @@ angular.module('PkuyApp', ['ngMaterial'])
     }
   })
 
-  /** Controlador del Diálogo para crear un Nuevo Cliente */
+  /**----------------------------------------------------- */
+  /**                                                      */
+  /** Controlador del Diálogo para crear un Nuevo Cliente  */
+  /**                                                      */
+  /**----------------------------------------------------- */
   .controller('dialogCrearNuevoCliente', function ($scope, $rootScope, $mdDialog, PkuyLink) {
     $scope.titulo = "Crear nuevo Cliente"
     $scope.nuevoCliente = new cl_cliente();
@@ -323,39 +341,26 @@ angular.module('PkuyApp', ['ngMaterial'])
 
   })
 
+  /**----------------------------------------------------- */
+  /**                                                      */
   /** Controlador del Diálogo para crear un Nuevo Producto */
+  /**                                                      */
+  /**----------------------------------------------------- */
   .controller('dialogCrearNuevoProducto', function ($scope, PkuyLink, $rootScope, $mdDialog) {
-    $scope.titulo = "Alta nuevo Producto"
-    $scope.nuevoProducto = {
-      'descripcion': '',
-      'origen': '',
-      'UM': '',
-      'precioReferencia': 1.00,
-      'tipoPrecio': '',
-    };
-    $scope.nuevaPresentacion = {
-      'denominacion': '',
-      'cantPresentacion': 1.00,
-      'UM': '',
-      'precio': 1.00,
-      'moneda': '',
-      'tipoPrecio': '',
-      'precioCalculado': 1.00
-    };
-    $scope.presentaciones = [];
-    $scope.presentaciones.push(Object.assign({}, $scope.nuevaPresentacion));
-    $scope.unidades = [{ "UM": "Un.", "descripcionUM": "Unidades" },
-    { "UM": "Paq.", "descripcionUM": "Paquetes" },
-    { "UM": "Kg", "descripcionUM": "Kilogramos" },
-    { "UM": "Gr", "descripcionUM": "Gramos" },
-    { "UM": "Ml", "descripcionUM": "Mililitros" },
-    { "UM": "Lts", "descripcionUM": "Litros" }];
-    $scope.tiposPrecio = PkuyLink.db.tiposPrecios.getAll();
     /** Cerrar Diálogo */
     $scope.cancel = () => $mdDialog.cancel();
 
-    $scope.agregarPresentacion = () => $scope.presentaciones.push(Object.assign({}, $scope.nuevaPresentacion));
-    $scope.quitarPresentacion = () => $scope.presentaciones.pop();
+    $scope.agregarPresentacion = function () {
+      let i = $scope.presentaciones.push(Object.assign({}, $scope.nuevaPresentacion));
+      $scope.presentaciones[--i].denominacion = $scope.nuevoProducto.descripcion;
+      $scope.$watch('presentaciones[' + i + '].valor', $scope.calcularPrecioPresentacion);
+      $scope.$watch('presentaciones[' + i + '].tipoPrecio', $scope.calcularPrecioPresentacion);
+    };
+
+    $scope.quitarPresentacion = function () {
+      if ($scope.presentaciones.length > 1)
+        $scope.presentaciones.pop();
+    };
 
     /** Clic en Crear */
     $scope.crearProducto = async function (nuevoCli, nuevaDir) {
@@ -366,8 +371,54 @@ angular.module('PkuyApp', ['ngMaterial'])
 
     }
 
-    $scope.calcularPrecioPresentacion = async function(index) {
-      console.log($scope.presentaciones[index]);
+    /** Calcular Precio de cada Presentación */
+    $scope.calcularPrecioPresentacion = function () {
+      for (let i = 0; i < $scope.presentaciones.length; i++) {
+
+        presentacion = $scope.presentaciones[i];
+        var selectedTipoPrecio = $scope.tiposPrecio
+          .find(tiposPrecio => tiposPrecio.tipoPrecio == presentacion.tipoPrecio);
+
+        if (selectedTipoPrecio !== undefined)
+          presentacion.moneda = selectedTipoPrecio.moneda;
+
+        if (presentacion.moneda == '%')
+          presentacion.precioCalculado = $scope.nuevoProducto.precioReferenciaUM * presentacion.valor / 100;
+        else
+          presentacion.precioCalculado = presentacion.valor;
+      }
     }
+
+    /** Definiciones del Controller */
+    $scope.titulo = "Alta nuevo Producto"
+
+    $scope.tiposPrecio = PkuyLink.db.tiposPrecios.getAll();
+    $scope.unidades = PkuyLink.db.unidadesMedida.getAll();
+
+    $scope.nuevoProducto = {
+      'descripcion': '',
+      'origen': '',
+      'UM': '',
+      'precioReferenciaUM': 1.00,
+      'tipoPrecio': '',
+      'cotizacionMoneda': 1.00
+    };
+    // Calcular precios
+    $scope.$watch('nuevoProducto.precioReferenciaUM', $scope.calcularPrecioPresentacion);
+    $scope.$watch('nuevoProducto.tipoPrecio', $scope.calcularPrecioPresentacion);
+
+    $scope.nuevaPresentacion = {
+      'denominacion': '',
+      'cantPresentacion': 1.00,
+      'UM': '',
+      'valor': 100.00,
+      'moneda': '',
+      'tipoPrecio': 'PPM',
+      'precioCalculado': 1.00
+    };
+
+    $scope.presentaciones = [];
+    // Inicializar Tabla de Presentaciones
+    //$scope.agregarPresentacion();
 
   })

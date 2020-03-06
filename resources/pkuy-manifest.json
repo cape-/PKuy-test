@@ -1,20 +1,20 @@
 {
-    "short_name": "PKuy 1.0",
-    "name": "Pacha Kuyuy - Gestión comercial y logística",
-    "start_url": "/gsheets_api_js-test.html",
+    "short_name": "PKuyApp 1.0",
+    "name": "PKuyApp - Gestión",
+    "start_url": "/index.html",
     "icons": [
         {
-            "src": "pkuy-icon-1x.png",
+            "src": "img/pkuy-icon-1x.png",
             "type": "image/png",
             "sizes": "48x48"
         },
         {
-            "src": "pkuy-icon-2x.png",
+            "src": "img/pkuy-icon-2x.png",
             "type": "image/png",
             "sizes": "96x96"
         },
         {
-            "src": "pkuy-icon-4x.png",
+            "src": "img/pkuy-icon-4x.png",
             "type": "image/png",
             "sizes": "192x192"
         }

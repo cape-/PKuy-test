@@ -13,7 +13,8 @@
         <md-dialog-content>
             <md-content layout-padding>
                 <div>
-                    <form ng-cloak name="crearNuevoProducto">
+                    <form ng-cloak name="crearNuevoProducto" 
+                    ng-submit="crearProducto(nuevoProducto, presentaciones)">
                         <h4>Datos del Producto</h4>
                         <div layout-gt-sm="row">
                             <md-input-container class="md-block" flex-gt-sm>
@@ -22,11 +23,11 @@
                             </md-input-container>
                         </div>
                         <div layout-gt-sm="row">
-                            <md-input-container class="md-block" flex-gt-sm="30">
+                            <md-input-container class="md-block" flex-gt-sm="">
                                 <label>Origen</label>
                                 <input name="origen" ng-model="nuevoProducto.origen" type="text">
                             </md-input-container>
-                            <md-input-container class="md-block" flex-gt-sm="20">
+                            <md-input-container class="md-block" flex-gt-sm="15">
                                 <label>Unidad de Medida</label>
                                 <md-select ng-model="nuevoProducto.UM">
                                     <md-option ng-repeat="unidad in unidades" value="{{unidad.UM}}">
@@ -35,23 +36,27 @@
                                 </md-select>
                             </md-input-container>
                             <md-input-container class="md-block" flex-gt-sm="20">
-                                <label>Precio de Referencia UM</label>
-                                <input name="prReferencia" ng-model="nuevoProducto.precioReferencia" type="number"
+                                <label>Precio de Referencia U/M</label>
+                                <input name="prReferencia" ng-model="nuevoProducto.precioReferenciaUM" type="number"
                                     step=".01">
                             </md-input-container>
                             <md-input-container class="md-block" flex-gt-sm="10">
                                 <label>Moneda</label>
                                 <input name="monedaPrReferencia" disabled ng-model="nuevoProducto.moneda">
                             </md-input-container>
-                            <md-input-container class="md-block" flex-gt-sm="30">
+                            <md-input-container class="md-block" flex-gt-sm="25">
                                 <label>Tipo de Precio</label>
                                 <md-select ng-model="nuevoProducto.tipoPrecio">
-                                    <md-option ng-repeat="tipoPrecio in tiposPrecio"
+                                    <md-option ng-repeat="tipoPrecio in tiposPrecio | filter: { claseTipoPrecio: 'M' }"
                                         ng-click='nuevoProducto.moneda=tiposPrecio[$index].moneda'
                                         value="{{tipoPrecio.tipoPrecio}}">
                                         {{tipoPrecio.nombreTipoPrecio}}
                                     </md-option>
                                 </md-select>
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm="10">
+                                <label>Cotizaci&oacute;n</label>
+                                <input name="cotizacionMoneda" disabled ng-model="nuevoProducto.cotizacionMoneda">
                             </md-input-container>
                         </div>
                         <div layout-gt-sm="row">
@@ -66,17 +71,27 @@
                                 <md-icon>remove</md-icon>
                             </md-button>
                         </div>
-                        <div layout-gt-sm="column">
+                        <div layout-gt-sm="column" ng-if="presentaciones.length == 0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Complete los datos del Producto y luego haga clic en + para agregar
+                                            presentaciones</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div layout-gt-sm="column" ng-if="presentaciones.length > 0">
                             <table flex-gt-sm>
                                 <thead>
                                     <tr layout-gt-sm="row">
                                         <th flex-gt-sm="30"><label>Denominacion</label></th>
                                         <th flex-gt-sm="10"><label>Cant.</label></th>
                                         <th flex-gt-sm="10"><label>UM</label></th>
-                                        <th flex-gt-sm="10"><label>Precio</label></th>
-                                        <th flex-gt-sm="10"><label>Moneda</label></th>
+                                        <th flex-gt-sm="10"><label>Valor</label></th>
                                         <th flex-gt-sm="20"><label>Tipo de Precio</label></th>
-                                        <th flex-gt-sm="10"><label>Precio Calculado</label></th>
+                                        <th flex-gt-sm="10"><label>Moneda</label></th>
+                                        <th flex-gt-sm="10"><label>Precio Final</label></th>
                                     </tr>
                                 </thead>
                             </table>
@@ -99,27 +114,26 @@
                                                     ng-model="nuevoProducto.UM" type="text" disabled>
                                             </td>
                                             <td flex-gt-sm="10">
-                                                <input class="md-table-input" required name="precioPresentacion"
-                                                    ng-model="presentacion.precio" type="number" step=".001">
-                                            </td>
-                                            <td flex-gt-sm="10">
-                                                <input class="md-table-input" required name="monedaPresentacion"
-                                                    ng-model="presentacion.moneda" type="text" disabled>
+                                                <input class="md-table-input" required name="valorPresentacion"
+                                                    ng-model="presentacion.valor" type="number" step=".01">
                                             </td>
                                             <td flex-gt-sm="20">
                                                 <select class="md-table-input" ng-model="presentacion.tipoPrecio">
-                                                    <option ng-repeat="tipoPrecio in tiposPrecio"
-                                                        ng-click='presentacion.moneda=tiposPrecio[$index].moneda'
+                                                    <option
+                                                        ng-repeat="tipoPrecio in tiposPrecio | filter: { claseTipoPrecio: 'P' }"
                                                         value="{{tipoPrecio.tipoPrecio}}">
                                                         {{tipoPrecio.nombreTipoPrecio}}
                                                     </option>
                                                 </select>
                                             </td>
                                             <td flex-gt-sm="10">
+                                                <input class="md-table-input" required name="monedaPresentacion"
+                                                    ng-model="presentacion.moneda" type="text" disabled>
+                                            </td>
+                                            <td flex-gt-sm="10">
                                                 <input class="md-table-input" required
                                                     name="precioCalculadoPresentacion"
-                                                    ng-model="presentacion.precioCalculado" 
-                                                    ng-bind="calcularPrecioPresentacion($index)" type="number" disabled>
+                                                    ng-model="presentacion.precioCalculado" type="number" disabled>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -127,9 +141,11 @@
                             </div>
                         </div>
                         <md-dialog-actions layout="row">
+                            <md-button class="md-accent md-disabled" ng-if="validaciones !== ''">
+                                {{ validaciones }}
+                            </md-button>
                             <span flex></span>
-                            <md-button class="md-raised md-accent" type="submit"
-                                ng-click="crearProducto(nuevoProducto, nuevaDireccion)">
+                            <md-button class="md-raised md-accent" type="submit">
                                 CREAR
                             </md-button>
                         </md-dialog-actions>

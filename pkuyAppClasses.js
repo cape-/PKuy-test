@@ -211,8 +211,9 @@ class cl_precioProducto extends PKuyObj_base {
   prodID;
   tipoPrecio;
   fechaHora_ini;
-  monto;
+  valor;
   moneda;
+  precioCalculado;
   fechaHora_fin;
 
   constructor(dataIn) {
@@ -230,6 +231,7 @@ class cl_tipoPrecio extends PKuyObj_base {
   tipoPrecio;
   nombreTipoPrecio;
   moneda;
+  claseTipoPrecio;
 
   constructor(dataIn) {
     super(dataIn);

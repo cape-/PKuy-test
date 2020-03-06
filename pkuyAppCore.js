@@ -13,6 +13,11 @@ var PkuyApp = {
   consolaDiv: document.getElementById('consolaDiv'),
   dbBackupNombre: 'PkuyDB_backup_',
   descuentos: ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90"],
+  dolar: {
+    oficial: {},
+    blue: {}
+  },
+
 
   updateSigninStatus: function (isSignedIn) {
     PkuyApp.gapiSignedIn = isSignedIn;
@@ -28,7 +33,7 @@ var PkuyApp = {
     gapi.auth2.getAuthInstance().signOut();
   },
 
-  startPkuyDB: function (callback = function () { }) {
+  startPkuyDB: function (callback = function () { }, cotizacionCallback = function () { }, httpClient) {
     PkuyApp.onLoaded = callback;
 
     new Promise(function (resolve) {
@@ -36,6 +41,39 @@ var PkuyApp = {
     }).then(function () {
       PkuyApp.mainLoad()
     });
+
+    new Promise(function (resolve) {
+
+      var PROMdolarBlue = httpClient.get('https://mercados.ambito.com//dolar/informal/variacion')
+        .then(function (response) {
+          // success
+          var dataCotizacion = response.data;
+          PkuyApp.dolar.blue.fecha = dataCotizacion.fecha;
+          PkuyApp.dolar.blue.compra = dataCotizacion.compra;
+          PkuyApp.dolar.blue.venta = dataCotizacion.venta;
+        }, function (response) {
+          // error
+          PkuyApp.warn('No se pudo obtener cotizacion Dolar Blue' + JSON.stringify(response.data));
+        });
+
+      var PROMdolarOficial = httpClient.get('https://mercados.ambito.com//dolar/oficial/variacion')
+        .then(function (response) {
+          // success
+          var dataCotizacion = response.data;
+          PkuyApp.dolar.oficial.fecha = dataCotizacion.fecha;
+          PkuyApp.dolar.oficial.compra = dataCotizacion.compra;
+          PkuyApp.dolar.oficial.venta = dataCotizacion.venta;
+        }, function (response) {
+          // error
+          PkuyApp.warn('No se pudo obtener cotizacion Dolar Oficial' + JSON.stringify(response.data));
+        });
+
+      Promise.all([PROMdolarBlue, PROMdolarOficial])
+        .then(function () {
+          cotizacionCallback();
+          PkuyApp.log('Cotizaciones obtenidas de Ambito.com')
+        })
+    })
   },
 
   mainLoad: function () {
@@ -294,6 +332,18 @@ var PkuyApp = {
     if (data.maestroDirecciones)
       PkuyApp.db.maestroDirecciones = new cl_maestroDirecciones(data.maestroDirecciones.recordSet);
 
+    // 15 unidadesMedida
+    PkuyApp.db.unidadesMedida = {
+      recordSet: [
+        { "UM": "Un.", "descripcionUM": "Unidades" },
+        { "UM": "Paq.", "descripcionUM": "Paquetes" },
+        { "UM": "Kg", "descripcionUM": "Kilogramos" },
+        { "UM": "Gr", "descripcionUM": "Gramos" },
+        { "UM": "Ml", "descripcionUM": "Mililitros" },
+        { "UM": "Lts", "descripcionUM": "Litros" }
+      ],
+      getAll: () => PkuyApp.db.unidadesMedida.recordSet
+    }
   },
 
   loadUserData: function () {
