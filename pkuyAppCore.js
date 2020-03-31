@@ -1,26 +1,63 @@
 var PkuyApp = {
+  // PkuyApp Autoría
   ver: '1.0',
   author: 'laucape@gmail.com',
-  startUpTS: Date.now(),
-  db: {},
+  authorName: 'Lautaro Capella',
+  country: 'AR',
+
+  // Inicialización
+  db: {
+    maestroClientes: {},
+    maestroPedidos: {},
+    statusPedidos: {},
+    tiposStatusPedido: {},
+    maestroAlmacenes: {},
+    maestroPtosDespacho: {},
+    maestroMediosPago: {},
+    maestroProductos: {},
+    maestroPrecios: {},
+    tiposPrecios: {},
+    maestroMovimientos: {},
+    tiposMovimiento: {},
+    maestroCalculosStock: {},
+    maestroDirecciones: {},
+    maestroCotizaciones: {},
+    unidadesMedida: {},
+    maestroTerminales: {},
+    dolar: {
+      oficial: {},
+      blue: {}
+    }
+  },
   logStorage: [],
   contactos: [],
   cabs: [],
-  localStorageName: 'PkuyDB',
-  defaultSheetRows: 10000,
-  defaultContactsPerCall: 1000,
+  startUpTS: Date.now(),
+  consolaDiv: document.getElementById('consolaDiv'), // DOM element de la Consola
+
+  // LocalStorage Params
+  localStorageName: 'PkuyDB', // Nombre de la imagen de BD en LocalStorage
+  localStorageTTL: 3600, // Duración (Segundos) de la imagen de BD en LocalStorage
+
+  // Google APIs Params
+  defaultSheetRows: 10000, // Numero (MAX) por defecto de registros a recuperar desde los Sheets
+  defaultContactsPerCall: 1000, // Número de contactos a obtener en cada llamada a Google People API
+  dbBackupNombre: 'PkuyDB_backup_', // Prefijo para BackUp de BD en drive
+  httpRetriesDelay: 2500, // 2,5 seg
+  httpRetriesAllowed: 48, // Max. 2 min
+
+
+  // Otros Params
   icon: "pkuy-icon-1x.png",
-  consolaDiv: document.getElementById('consolaDiv'),
-  dbBackupNombre: 'PkuyDB_backup_',
   descuentos: ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90"],
-  dolar: {
-    oficial: {},
-    blue: {}
-  },
 
 
   updateSigninStatus: function (isSignedIn) {
     PkuyApp.gapiSignedIn = isSignedIn;
+    if (isSignedIn)
+      PkuyApp.log('Google Account: Logged In');
+    else
+      PkuyApp.error('Google Account: Logged Out');
   },
 
   handleAuthClick: function (event) {
@@ -44,35 +81,87 @@ var PkuyApp = {
 
     new Promise(function (resolve) {
 
-      var PROMdolarBlue = httpClient.get('https://mercados.ambito.com//dolar/informal/variacion')
-        .then(function (response) {
-          // success
-          var dataCotizacion = response.data;
-          PkuyApp.dolar.blue.fecha = dataCotizacion.fecha;
-          PkuyApp.dolar.blue.compra = dataCotizacion.compra;
-          PkuyApp.dolar.blue.venta = dataCotizacion.venta;
-        }, function (response) {
-          // error
-          PkuyApp.warn('No se pudo obtener cotizacion Dolar Blue' + JSON.stringify(response.data));
-        });
-
+      /* COTIZACION OFICIAL */
       var PROMdolarOficial = httpClient.get('https://mercados.ambito.com//dolar/oficial/variacion')
         .then(function (response) {
           // success
           var dataCotizacion = response.data;
-          PkuyApp.dolar.oficial.fecha = dataCotizacion.fecha;
-          PkuyApp.dolar.oficial.compra = dataCotizacion.compra;
-          PkuyApp.dolar.oficial.venta = dataCotizacion.venta;
-        }, function (response) {
+
+          // Formato fecha = "DD/MM/YYYY - HH:MM"
+          let fechaStr = dataCotizacion.fecha.split('-')[0].trim();
+          let horaStr = dataCotizacion.fecha.split('-')[1].trim();
+          let fechaISO = fechaStr.split('/')[1] + '/' + fechaStr.split('/')[0] + '/' + fechaStr.split('/')[2] + ' ' + horaStr;
+          PkuyApp.db.dolar.oficial.fecha = Date.parse(fechaISO);
+          PkuyApp.db.dolar.oficial.ts = Date.now();
+
+          // Formato numeros = "99,01"
+          PkuyApp.db.dolar.oficial.compra = Number(dataCotizacion.compra.replace(',', '.'));
+          PkuyApp.db.dolar.oficial.venta = Number(dataCotizacion.venta.replace(',', '.'));
+
+          var cotizacionUSDARS = new cl_cotizacion({
+            cotizacionTS: PkuyApp.db.dolar.oficial.fecha,
+            monedaDe: 'USD',
+            monedaA: 'ARS',
+            factor: PkuyApp.db.dolar.oficial.venta,
+          });
+          PkuyApp.nuevaCotizacion(cotizacionUSDARS);
+          var cotizacionARSUSD = new cl_cotizacion({
+            cotizacionTS: PkuyApp.db.dolar.oficial.fecha,
+            monedaDe: 'ARS',
+            monedaA: 'USD',
+            factor: 1 / PkuyApp.db.dolar.oficial.venta,
+          });
+          PkuyApp.nuevaCotizacion(cotizacionARSUSD);
+
+          PkuyApp.log('Cotización Dolar Oficial obtenida de Ambito.com')
+        })
+        .catch(function (response) {
           // error
-          PkuyApp.warn('No se pudo obtener cotizacion Dolar Oficial' + JSON.stringify(response.data));
+          PkuyApp.warn('No se pudo obtener cotizacion Dolar Oficial (Ámbito.com) ' + JSON.stringify(response));
         });
 
+      /* COTIZACION BLUE */
+      var PROMdolarBlue = httpClient.get('https://mercados.ambito.com//dolar/informal/variacion')
+        .then(function (response) {
+          var dataCotizacion = response.data;
+
+          // Formato fecha = "DD/MM/YYYY - HH:MM"
+          let fechaStr = dataCotizacion.fecha.split('-')[0].trim();
+          // success
+          let horaStr = dataCotizacion.fecha.split('-')[1].trim();
+          let fechaISO = fechaStr.split('/')[1] + '/' + fechaStr.split('/')[0] + '/' + fechaStr.split('/')[2] + ' ' + horaStr;
+          PkuyApp.db.dolar.blue.fecha = Date.parse(fechaISO);
+          PkuyApp.db.dolar.blue.ts = Date.now();
+
+          // Formato numeros = "99,01"
+          PkuyApp.db.dolar.blue.compra = Number(dataCotizacion.compra.replace(',', '.'));
+          PkuyApp.db.dolar.blue.venta = Number(dataCotizacion.venta.replace(',', '.'));
+
+          var cotizacionUSDBARS = new cl_cotizacion({
+            cotizacionTS: PkuyApp.db.dolar.blue.fecha,
+            monedaDe: 'USDB',
+            monedaA: 'ARS',
+            factor: PkuyApp.db.dolar.blue.venta,
+          });
+          PkuyApp.nuevaCotizacion(cotizacionUSDBARS);
+          var cotizacionARSUSDB = new cl_cotizacion({
+            cotizacionTS: PkuyApp.db.dolar.blue.fecha,
+            monedaDe: 'ARS',
+            monedaA: 'USDB',
+            factor: 1 / PkuyApp.db.dolar.blue.venta,
+          });
+          PkuyApp.nuevaCotizacion(cotizacionARSUSDB);
+
+          PkuyApp.log('Cotización Dolar Blue obtenida de Ambito.com')
+        }, function (response) {
+          // error
+          PkuyApp.warn('No se pudo obtener cotizacion Dolar Blue (Ámbito.com) ' + JSON.stringify(response));
+        });
+
+      // Callback
       Promise.all([PROMdolarBlue, PROMdolarOficial])
-        .then(function () {
-          cotizacionCallback();
-          PkuyApp.log('Cotizaciones obtenidas de Ambito.com')
-        })
+        .then(cotizacionCallback);
+
     })
   },
 
@@ -92,13 +181,14 @@ var PkuyApp = {
     initProm.catch((error) => PkuyApp.error('Error en gapi.client.init! ' + JSON.stringify(error, null, 2)))
 
     initProm.then(async function () {
+
       // Set GAPI Signing Status
       PkuyApp.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
       gapi.auth2.getAuthInstance().isSignedIn.listen(PkuyApp.updateSigninStatus);
 
       if (PkuyApp.gapiSignedIn === false) {
         PkuyApp.error('PkuyApp no está conectado a tu cuenta de Google.'
-          + ' Conectalo desde el menú 0.Sistema > Conectar con Google')
+          + ' Conectalo desde el menú 0.Sistema > Conectar con Google');
         PkuyApp.onLoaded();
         return;
       }
@@ -128,7 +218,7 @@ var PkuyApp = {
       //  Determinar si hay backup en localStorage
       var localStorageDB = PkuyApp.loadLocalDB();
 
-      if (localStorageDB && (localStorageDB.ts >= (Date.now() - 3600000))) {
+      if (localStorageDB && (localStorageDB.ts >= (Date.now() - (PkuyApp.localStorageTTL * 1000)))) {
         // Si hay y su TS < 1 hora >>> Recuperar DB desde localStorage
         PkuyApp.log('Recuperando PkuyDB desde localStorage');
 
@@ -145,91 +235,92 @@ var PkuyApp = {
         // Descargar desde Google Sheets
         PkuyApp.log('Descargando PkuyDB desde Google Sheets');
 
-        var tmpData = {};
-        tmpData.maestroClientes = {};
-        tmpData.maestroPedidos = {};
-        tmpData.statusPedidos = {};
-        tmpData.tiposStatusPedido = {};
-        tmpData.maestroAlmacenes = {};
-        tmpData.maestroPtosDespacho = {};
-        tmpData.maestroMediosPago = {};
-        tmpData.maestroProductos = {};
-        tmpData.maestroPrecios = {};
-        tmpData.tiposPrecios = {};
-        tmpData.maestroMovimientos = {};
-        tmpData.tiposMovimiento = {};
-        tmpData.maestroCalculosStock = {};
-        tmpData.maestroDirecciones = {};
+        var tmpData = { ...PkuyApp.db }; // Copia objeto Temporal
 
         // 01 cl_maestroClientes
         var PROMmaestroClientes = PkuyApp.loadSheetTableToObj(cl_maestroClientes.sheetName())
           .then((data) => { tmpData.maestroClientes.recordSet = (data); PkuyApp.log('maestroClientes Descargado') })
-          .catch((error) => { PkuyApp.error('maestroClientes > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('maestroClientes > ' + error.toString()) });
 
         // 02 cl_maestroPedidos
         var PROMmaestroPedidos = PkuyApp.loadSheetTableToObj(cl_maestroPedidos.sheetName())
           .then((data) => { tmpData.maestroPedidos.recordSet = (data); PkuyApp.log('maestroPedidos Descargado') })
-          .catch((error) => { PkuyApp.error('maestroPedidos > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('maestroPedidos > ' + error.toString()) });
 
         // 03 cl_statusPedidos
         var PROMstatusPedidos = PkuyApp.loadSheetTableToObj(cl_statusPedidos.sheetName())
           .then((data) => { tmpData.statusPedidos.recordSet = (data); PkuyApp.log('statusPedidos Descargado') })
-          .catch((error) => { PkuyApp.error('statusPedidos > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('statusPedidos > ' + error.toString()) });
 
         // 04 cl_tiposStatusPedido
         var PROMtiposStatusPedido = PkuyApp.loadSheetTableToObj(cl_tiposStatusPedido.sheetName())
           .then((data) => { tmpData.tiposStatusPedido.recordSet = (data); PkuyApp.log('tiposStatusPedido Descargado') })
-          .catch((error) => { PkuyApp.error('tiposStatusPedido > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('tiposStatusPedido > ' + error.toString()) });
 
         // 05 cl_maestroAlmacenes
         var PROMmaestroAlmacenes = PkuyApp.loadSheetTableToObj(cl_maestroAlmacenes.sheetName())
           .then((data) => { tmpData.maestroAlmacenes.recordSet = (data); PkuyApp.log('maestroAlmacenes Descargado') })
-          .catch((error) => { PkuyApp.error('maestroAlmacenes > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('maestroAlmacenes > ' + error.toString()) });
 
         // 06 cl_maestroPtosDespacho
         var PROMmaestroPtosDespacho = PkuyApp.loadSheetTableToObj(cl_maestroPtosDespacho.sheetName())
           .then((data) => { tmpData.maestroPtosDespacho.recordSet = (data); PkuyApp.log('maestroPtosDespacho Descargado') })
-          .catch((error) => { PkuyApp.error('maestroPtosDespacho > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('maestroPtosDespacho > ' + error.toString()) });
 
         // 07 cl_maestroMediosPago
         var PROMmaestroMediosPago = PkuyApp.loadSheetTableToObj(cl_maestroMediosPago.sheetName())
           .then((data) => { tmpData.maestroMediosPago.recordSet = (data); PkuyApp.log('mediosPago Descargado') })
-          .catch((error) => { PkuyApp.error('mediosPago > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('mediosPago > ' + error.toString()) });
 
         // 08 cl_maestroProductos
         var PROMmaestroProductos = PkuyApp.loadSheetTableToObj(cl_maestroProductos.sheetName())
           .then((data) => { tmpData.maestroProductos.recordSet = (data); PkuyApp.log('maestroProductos Descargado') })
-          .catch((error) => { PkuyApp.error('maestroProductos > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('maestroProductos > ' + error.toString()) });
 
         // 09 cl_maestroPrecios
         var PROMmaestroPrecios = PkuyApp.loadSheetTableToObj(cl_maestroPrecios.sheetName())
           .then((data) => { tmpData.maestroPrecios.recordSet = (data); PkuyApp.log('maestroPrecios Descargado') })
-          .catch((error) => { PkuyApp.error('maestroPrecios > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('maestroPrecios > ' + error.toString()) });
 
         // 10 cl_tiposPrecios
         var PROMtiposPrecios = PkuyApp.loadSheetTableToObj(cl_tiposPrecios.sheetName())
           .then((data) => { tmpData.tiposPrecios.recordSet = (data); PkuyApp.log('tiposPrecios Descargado') })
-          .catch((error) => { PkuyApp.error('tiposPrecios > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('tiposPrecios > ' + error.toString()) });
 
         // 11 cl_maestroMovimientos
         var PROMmaestroMovimientos = PkuyApp.loadSheetTableToObj(cl_maestroMovimientos.sheetName())
           .then((data) => { tmpData.maestroMovimientos.recordSet = (data); PkuyApp.log('maestroMovimientos Descargado') })
-          .catch((error) => { PkuyApp.error('maestroMovimientos > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('maestroMovimientos > ' + error.toString()) });
 
         // 12 cl_tiposMovimiento
         var PROMtiposMovimiento = PkuyApp.loadSheetTableToObj(cl_tiposMovimiento.sheetName())
           .then((data) => { tmpData.tiposMovimiento.recordSet = (data); PkuyApp.log('tiposMovimiento Descargado') })
-          .catch((error) => { PkuyApp.error('cl_tiposMovimiento > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('cl_tiposMovimiento > ' + error.toString()) });
 
         // 13 cl_maestroCalculosStock
         var PROMmaestroCalculosStock = PkuyApp.loadSheetTableToObj(cl_maestroCalculosStock.sheetName())
           .then((data) => { tmpData.maestroCalculosStock.recordSet = (data); PkuyApp.log('maestroCalculosStock Descargado') })
-          .catch((error) => { PkuyApp.error('maestroCalculosStock > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('maestroCalculosStock > ' + error.toString()) });
 
         // 14 cl_maestroDirecciones
         var PROMmaestroDirecciones = PkuyApp.loadSheetTableToObj(cl_maestroDirecciones.sheetName())
           .then((data) => { tmpData.maestroDirecciones.recordSet = (data); PkuyApp.log('direcciones Descargado') })
-          .catch((error) => { PkuyApp.error('direcciones > ' + JSON.stringify(error)) });
+          .catch((error) => { PkuyApp.error('direcciones > ' + error.toString()) });
+
+        // 15 cl_maestroCotizaciones
+        var PROMmaestroCotizaciones = PkuyApp.loadSheetTableToObj(cl_maestroCotizaciones.sheetName())
+          .then((data) => { tmpData.maestroCotizaciones.recordSet = (data); PkuyApp.log('maestroCotizaciones Descargado') })
+          .catch((error) => { PkuyApp.error('maestroCotizaciones > ' + error.toString()) });
+
+        // 16 cl_unidadesMedida
+        var PROMunidadesMedida = PkuyApp.loadSheetTableToObj(cl_unidadesMedida.sheetName())
+          .then((data) => { tmpData.unidadesMedida.recordSet = (data); PkuyApp.log('unidadesMedida Descargado') })
+          .catch((error) => { PkuyApp.error('unidadesMedida > ' + error.toString()) });
+
+        // 17 cl_maestroTerminales
+        var PROMmaestroTerminales = PkuyApp.loadSheetTableToObj(cl_maestroTerminales.sheetName())
+          .then((data) => { tmpData.maestroTerminales.recordSet = (data); PkuyApp.log('maestroTerminales Descargado') })
+          .catch((error) => { PkuyApp.error('maestroTerminales > ' + error.toString()) });
 
         startupPROMS = [PROMmaestroClientes,
           PROMmaestroPedidos,
@@ -245,17 +336,16 @@ var PkuyApp = {
           PROMtiposMovimiento,
           PROMmaestroCalculosStock,
           PROMmaestroDirecciones,
+          PROMmaestroCotizaciones,
+          PROMunidadesMedida,
+          PROMmaestroTerminales,
         ];
 
         Promise.all(startupPROMS)
           .then(function () {
             // Inicializar DB desde la data recolectada
             PkuyApp.initPkuyDB(tmpData);
-
-            // Backup en localStorage
-            PkuyApp.log("Backup to localStorage");
             PkuyApp.db.ts = Date.now();
-            PkuyApp.saveLocalDB();
 
             // AngularJS callback
             PkuyApp.onLoaded();
@@ -332,18 +422,19 @@ var PkuyApp = {
     if (data.maestroDirecciones)
       PkuyApp.db.maestroDirecciones = new cl_maestroDirecciones(data.maestroDirecciones.recordSet);
 
-    // 15 unidadesMedida
-    PkuyApp.db.unidadesMedida = {
-      recordSet: [
-        { "UM": "Un.", "descripcionUM": "Unidades" },
-        { "UM": "Paq.", "descripcionUM": "Paquetes" },
-        { "UM": "Kg", "descripcionUM": "Kilogramos" },
-        { "UM": "Gr", "descripcionUM": "Gramos" },
-        { "UM": "Ml", "descripcionUM": "Mililitros" },
-        { "UM": "Lts", "descripcionUM": "Litros" }
-      ],
-      getAll: () => PkuyApp.db.unidadesMedida.recordSet
-    }
+    // 15 cl_maestroCotizaciones !!!!!
+    if (data.maestroCotizaciones)
+      PkuyApp.db.maestroCotizaciones = new cl_maestroCotizaciones(data.maestroCotizaciones.recordSet);
+
+    // 16 unidadesMedida
+    if (data.unidadesMedida)
+      PkuyApp.db.unidadesMedida = new cl_unidadesMedida(data.unidadesMedida.recordSet);
+
+    // 17 cl_maestroTerminales
+    if (data.maestroTerminales)
+      PkuyApp.db.maestroTerminales = new cl_maestroTerminales(data.maestroTerminales.recordSet);
+
+
   },
 
   loadUserData: function () {
@@ -428,10 +519,12 @@ var PkuyApp = {
   loadSheetTableToObj: function (tableName, tabRange = null, startRecord = 1, endRecord = PkuyApp.defaultSheetRows) {
     return new Promise(async function (resolve, reject) {
 
-      if (startRecord > endRecord)
-        reject();
+      if (startRecord > endRecord) {
+        reject(new Error('startRecord > endRecord'));
+        return;
+      }
 
-      var returnTable = new Array();
+      var returnTable = [];
 
       var cab = await PkuyApp.getCabOfTable(tableName);
 
@@ -446,6 +539,12 @@ var PkuyApp = {
         majorDimension: 'ROWS'
       }).then(function (response) {
         var range = response.result;
+
+        if (!range.hasOwnProperty('values')) {
+          reject(new Error('Tabla ' + tableName + ': no se recuperaron registros.'));
+          return;
+        }
+
         if (range.values.length > 0) {
           // Recorrer registros
           for (i = 0; i < range.values.length; i++) {
@@ -460,13 +559,16 @@ var PkuyApp = {
               returnTable.push(tempObj);
             }
           }
-          return resolve(returnTable);
+          resolve(returnTable);
+          return;
 
         } else {
-          reject('[Warn] loadSheetTableToObj.get: No data found.');
+          reject(new Error('Tabla ' + tableName + ': no se recuperaron registros.'));
+          return;
         }
       }, function (error) {
-        reject('[Error] loadSheetTableToObj.get: ' + JSON.stringify(error, null, 2));
+        reject(new Error('loadSheetTableToObj.get: ' + JSON.stringify(error, null, 2)));
+        return;
       });
     });
   },
@@ -521,7 +623,36 @@ var PkuyApp = {
   //   });
   // };
 
+  appendObjToSheetTableRetries: 0,
+
+  /**
+   * Insertar un objeto genérico en una Tabla (Sheet)
+   * @param {any} obj Objeto a insertar
+   * @param {string} tableName Tabla (Sheet)
+   * @param {boolean} autoGetNewID `True`: se obtiene nuevo ID autoincremental. Se llamará a `callback` al obtenerse el nuevo ID. `False`: sólo se inserta el objeto tal cual.
+   * @param {function} callback Sólo si `autoGetNewID` es true. Al obtenerse el nuevo ID autoincremental se llama a `callback` con el nuevo ID como único parámetro para su asignación al objeto.
+   */
   appendObjToSheetTable: async function (obj, tableName, autoGetNewID = false, callback = function () { }) {
+
+    if (PkuyApp.appendObjToSheetTableRetries >= PkuyApp.httpRetriesAllowed)
+      return;
+
+    try {
+      var sheetsAPI = gapi.client.sheets.spreadsheets;
+
+    } catch (e) {
+      if (e.name !== "TypeError")
+        throw e;
+
+      PkuyApp.appendObjToSheetTableRetries++;
+      setTimeout(function () {
+        PkuyApp.appendObjToSheetTable(obj, tableName, autoGetNewID, callback);
+        console.log("Retry appendObjToSheetTable for Object:", obj);
+      }, PkuyApp.httpRetriesDelay);
+      return;
+    }
+
+    PkuyApp.appendObjToSheetTableRetries = 0;
 
     var cab = await PkuyApp.getCabOfTable(tableName);
 
@@ -533,7 +664,7 @@ var PkuyApp = {
     for (let i = 0; i < cab.length; i++) {
       let field = cab[i];
 
-      if (obj[cab[i]] === undefined)
+      if (obj[field] === undefined)
         recordValues.push(null);
       else
         recordValues.push(obj[field]);
@@ -544,11 +675,11 @@ var PkuyApp = {
       recordValues[0] = '=INDIRECT("R[-1]C[0]",FALSE)+1';
     }
 
-    console.debug('append http send');
+    console.debug('DEBUG // payload http send');
     console.debug(recordValues);
 
     await new Promise(function (resolve, reject) {
-      gapi.client.sheets.spreadsheets.values.append({
+      sheetsAPI.values.append({
         spreadsheetId: PkuyApp.dbSpreadsheet,
         range: tableName + '!A2:ZZ' + PkuyApp.defaultSheetRows,
         valueInputOption: 'USER_ENTERED',
@@ -563,7 +694,7 @@ var PkuyApp = {
           if (response.result.updates.updatedRange != undefined) {
             obj.rowRange = response.result.updates.updatedRange.replace(/:[A-Z]{0,2}([0-9]{0,5})$/, ':ZZ$1');
             if (autoGetNewID) {
-              callback(response.result.updates.updatedData.values[0][0]);
+              callback(response.result.updates.updatedData.values[0][0]); // Send New ID for assignment
             }
             resolve();
           } else {
@@ -575,6 +706,21 @@ var PkuyApp = {
           reject();
         });
     });
+
+    /* Registrar UPDATELOGS para las otras terminales */
+    if (tableName !== 'updateLog') { // Evitar recursividad infinita
+      for (let i = 0; i < PkuyApp.db.maestroTerminales.recordSet.length; i++) {
+        const terminal = PkuyApp.db.maestroTerminales.recordSet[i];
+        if (terminal.terminalID == PkuyApp.thisTerminalID) // No registrar UpdateLogs para esta terminal
+          continue;
+        var updateLog = new cl_updateLog({
+          updTS: Date.now(),
+          terminalID: terminal.terminalID,
+          updRowRange: obj.rowRange // Rango Actualizado en la BD
+        });
+        PkuyApp.appendObjToSheetTable(updateLog, 'updateLog'); // Llamada recursiva
+      }
+    };
 
     return obj;
   },
@@ -597,7 +743,7 @@ var PkuyApp = {
         recordValues.push(obj[field]);
     }
 
-    console.debug('update http send');
+    console.debug('DEBUG // update http send');
     console.debug(recordValues);
 
     await new Promise(function (resolve, reject) {
@@ -681,22 +827,145 @@ var PkuyApp = {
   },
 
   nuevoCliente: async function (nuevoCliente, nuevaDireccion) {
-    console.debug("nuevoCliente called")
-    await PkuyApp.appendObjToSheetTable(nuevaDireccion, cl_maestroDirecciones.sheetName(), true,
-      (newID) => nuevaDireccion.dirID = nuevoCliente.dirID = newID);
 
-    await PkuyApp.appendObjToSheetTable(nuevoCliente, cl_maestroClientes.sheetName(), true,
-      (newID) => nuevoCliente.cliID = newID);
+    try {
+      /*------------------------------------------------------------------*/
+      /*  Registrar dirección en DB obtenienndo newID */
+      await PkuyApp.appendObjToSheetTable(nuevaDireccion, cl_maestroDirecciones.sheetName(), true,
+        (newID) => nuevaDireccion.dirID = nuevoCliente.dirID = newID);
 
-    PkuyApp.db.maestroClientes.add(nuevoCliente);
-    PkuyApp.db.maestroDirecciones.add(nuevaDireccion);
-    PkuyApp.saveLocalDB();
+      /*  Registrar dirección localmente */
+      PkuyApp.db.maestroDirecciones.add(nuevaDireccion);
 
+      /*------------------------------------------------------------------*/
+      /*  Registrar cliente en DB obtenienndo newID */
+      await PkuyApp.appendObjToSheetTable(nuevoCliente, cl_maestroClientes.sheetName(), true,
+        (newID) => nuevoCliente.cliID = newID);
+
+      /*  Registrar cliente localmente */
+      PkuyApp.db.maestroClientes.add(nuevoCliente);
+
+      // Guardar Cambios
+      PkuyApp.saveLocalDB();
+
+      /*------------------------------------------------------------------*/
+      /*  Error */
+    } catch (e) {
+      PkuyApp.error(e);
+      return;
+    }
+
+    /*------------------------------------------------------------------*/
+    /*  Notificar */
     PkuyApp.notificacion('Cliente Creado', false, 'El Cliente ' + nuevoCliente.cliID
       + ' (' + nuevoCliente.nombre + ' ' + nuevoCliente.apellido + ') ha sido creado correctamente!\n'
       + 'Su dirección es la número ' + nuevoCliente.dirID + '.');
     PkuyApp.log('Cliente Nro.' + nuevoCliente.cliID + ' creado con dirección ' + nuevoCliente.dirID);
     return nuevoCliente;
+
+  },
+
+  nuevoProducto: async function (nuevoProducto) {
+
+    try {
+      /*------------------------------------------------------------------*/
+      /*  Registrar Producto en DB obtenienndo newID */
+      await PkuyApp.appendObjToSheetTable(nuevoProducto, cl_maestroProductos.sheetName(), true,
+        (newID) => nuevoProducto.prodID = newID);
+
+      /*  Registrar Producto localmente */
+      PkuyApp.db.maestroProductos.add(nuevoProducto);
+
+      // Guardar Cambios
+      PkuyApp.saveLocalDB();
+
+      /*------------------------------------------------------------------*/
+      /*  Error */
+    } catch (e) {
+      PkuyApp.error(e);
+      return;
+    }
+
+    /*------------------------------------------------------------------*/
+    /*  Notificar */
+    PkuyApp.notificacion('Producto Creado', false, 'El Producto ' + nuevoProducto.prodID
+      + ' (' + nuevoProducto.descripcion + ') ha sido creado correctamente!');
+    PkuyApp.log('Producto ' + nuevoProducto.prodID + ' (' + nuevoProducto.descripcion + ') creado');
+    return nuevoProducto;
+
+  },
+
+  nuevaCotizacionRetries: 0,
+
+  nuevaCotizacion: async function (nuevaCotizacion) {
+
+    /*------------------------------------------------------------------*/
+    /*  Control y Recursive async call */
+    if (PkuyApp.nuevaCotizacionRetries >= PkuyApp.httpRetriesAllowed)
+      return;
+
+    /* Esperar a que se haya cargado la DB */
+    if (JSON.stringify(PkuyApp.db.maestroCotizaciones) === '{}') {
+      PkuyApp.nuevaCotizacionRetries++;
+      setTimeout(() => { PkuyApp.nuevaCotizacion(nuevaCotizacion) }, PkuyApp.httpRetriesDelay);
+      return;
+    }
+    PkuyApp.nuevaCotizacionRetries = 0;
+
+    /*------------------------------------------------------------------*/
+    /*  Registrar cotización localmente */
+    try {
+      PkuyApp.db.maestroCotizaciones.add(nuevaCotizacion);
+      PkuyApp.saveLocalDB();
+
+      /*------------------------------------------------------------------*/
+      /*  Error */
+    } catch (e) {
+      PkuyApp.error(e);
+      return;
+    }
+
+    /*------------------------------------------------------------------*/
+    /*  Registrar cotización en DB */
+    if (PkuyApp.db.maestroCotizaciones.getLast(nuevaCotizacion.monedaDe, nuevaCotizacion.monedaA).cotizacionTS < nuevaCotizacion.cotizacionTS) {
+      /*  Si la cotización aún no fue registrada -> Registrar */
+      PkuyApp.appendObjToSheetTable(nuevaCotizacion, cl_maestroCotizaciones.sheetName(), false);
+    }
+
+    /*------------------------------------------------------------------*/
+    /*  Notificar */
+    PkuyApp.notificacion('Cotización registrada', false, 'Cotización de ' + nuevaCotizacion.monedaDe + ' a ' + nuevaCotizacion.monedaA + ' registrada correctamente');
+    PkuyApp.log('Cotización de ' + nuevaCotizacion.monedaDe + ' a ' + nuevaCotizacion.monedaA + ' registrada correctamente');
+    return nuevaCotizacion;
+
+  },
+
+
+  nuevoPrecio: async function (nuevoPrecio) {
+
+    /*------------------------------------------------------------------*/
+    /*  Registrar precio localmente */
+    try {
+      PkuyApp.db.maestroPrecios.add(nuevoPrecio);
+      PkuyApp.saveLocalDB();
+
+      /*------------------------------------------------------------------*/
+      /*  Error */
+    } catch (e) {
+      PkuyApp.error(e);
+      return;
+    }
+
+    /*------------------------------------------------------------------*/
+    /*  Registrar precio en DB */
+    PkuyApp.appendObjToSheetTable(nuevoPrecio, cl_maestroPrecios.sheetName(), false);
+
+
+    /*------------------------------------------------------------------*/
+    /*  Notificar */
+    PkuyApp.notificacion('Precio registrado', false, 'Precio ' + nuevoPrecio.tipoPrecio + ' para el producto ' + nuevoPrecio.prodID + ' registrado correctamente');
+    PkuyApp.log('Precio ' + nuevoPrecio.tipoPrecio + ' para el producto ' + nuevoPrecio.prodID + ' registrado correctamente');
+    return nuevoPrecio;
 
   },
 
@@ -789,8 +1058,15 @@ var PkuyApp = {
     });
   },
 
+  // Conversiones de monedas
+  convertUSDtoARS: (valor) => valor * PkuyApp.db.dolar.oficial.venta,
+  convertUSDBtoARS: (valor) => valor * PkuyApp.db.dolar.blue.venta,
+  convertARStoUSD: (valor) => valor / PkuyApp.db.dolar.oficial.compra,
+  convertARStoUSDB: (valor) => valor / PkuyApp.db.dolar.blue.compra,
+
   // TODO: Borrar!
   testMode: true
+
 
 };
 

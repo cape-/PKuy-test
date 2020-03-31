@@ -2,6 +2,7 @@ class PKuyObj_base {
   rowRange;
   TS;
   usuario;
+  borrado;
   constructor() {
   }
   direccion() {
@@ -14,7 +15,7 @@ class PKuyObj_base {
 //*--------------------------------------------OBJETOS------------------------------------------*/
 //*---------------------------------------------------------------------------------------------*/
 
-/* CLASE CLIENTE */
+/* 01 CLASE CLIENTE */
 class cl_cliente extends PKuyObj_base {
   cliID;
   nombre;
@@ -35,7 +36,7 @@ class cl_cliente extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.cliID;
+    this.keys = () => [this.cliID];
   }
   apellidoNombre() {
     return this.apellido + ', ' + this.nombre;
@@ -50,7 +51,7 @@ class cl_cliente extends PKuyObj_base {
   }
 }
 
-/* CLASE PEDIDO */
+/* 02 CLASE PEDIDO */
 class cl_pedido extends PKuyObj_base {
   ordID;
   ordPos;
@@ -81,7 +82,7 @@ class cl_pedido extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.ordID + this.ordPos;
+    this.keys = () => [this.ordID, this.ordPos];
     // if (this.TS <<< Seguir con inicializacion
   }
   agregarProducto(cbtePago) {
@@ -106,7 +107,7 @@ class cl_pedido extends PKuyObj_base {
   }
 }
 
-/* CLASE STATUS DE PEDIDOS */
+/* 03 CLASE STATUS DE PEDIDOS */
 class cl_statusPedido extends PKuyObj_base {
   ordID;
   statusTS;
@@ -118,11 +119,11 @@ class cl_statusPedido extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.ordID + this.statusTS + this.tipoStatus;
+    this.keys = () => [this.ordID, this.statusTS, this.tipoStatus];
   }
 }
 
-/* CLASE TIPO DE STATUS DE PEDIDOS */
+/* 04 CLASE TIPO DE STATUS DE PEDIDOS */
 class cl_tipoStatusPedido extends PKuyObj_base {
   tipoStatus;
   nombreTipoStatus;
@@ -133,11 +134,11 @@ class cl_tipoStatusPedido extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.tipoStatus;
+    this.keys = () => [this.tipoStatus];
   }
 }
 
-/* CLASE ALMACEN*/
+/* 05 CLASE ALMACEN*/
 class cl_almacen extends PKuyObj_base {
   almacenID;
   nombreAlmacen;
@@ -149,11 +150,11 @@ class cl_almacen extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.almacenID;
+    this.keys = () => [this.almacenID];
   }
 }
 
-/* CLASE PUNTO DE DESPACHO */
+/* 06 CLASE PUNTO DE DESPACHO */
 class cl_ptoDespacho extends PKuyObj_base {
   ptoDespachoID;
   nombrePtoDespacho;
@@ -165,11 +166,11 @@ class cl_ptoDespacho extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.ptoDespachoID;
+    this.keys = () => [this.ptoDespachoID];
   }
 }
 
-/* CLASE MEDIO DE PAGO */
+/* 07 CLASE MEDIO DE PAGO */
 class cl_medioPago extends PKuyObj_base {
   medioPagoID;
   descripcion;
@@ -180,11 +181,11 @@ class cl_medioPago extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.medioPagoID;
+    this.keys = () => [this.medioPagoID];
   }
 }
 
-/* CLASE PRODUCTO */
+/* 08 CLASE PRODUCTO */
 class cl_producto extends PKuyObj_base {
   prodID;
   descripcion;
@@ -202,19 +203,20 @@ class cl_producto extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.prodID;
+    this.keys = () => [this.prodID];
   }
 }
 
-/* CLASE PRECIO PRODUCTO */
+/* 09 CLASE PRECIO PRODUCTO */
 class cl_precioProducto extends PKuyObj_base {
   prodID;
   tipoPrecio;
-  fechaHora_ini;
+  inicioTS;
+  finTS;
   valor;
-  moneda;
   precioCalculado;
-  fechaHora_fin;
+  moneda;
+  cotizacionMoneda;
 
   constructor(dataIn) {
     super(dataIn);
@@ -222,11 +224,11 @@ class cl_precioProducto extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.prodID + this.tipoPrecio + this.fechaHora_ini;
+    this.keys = () => [this.prodID, this.tipoPrecio, this.inicioTS];
   }
 }
 
-/* CLASE TIPO DE PRECIO */
+/* 10 CLASE TIPO DE PRECIO */
 class cl_tipoPrecio extends PKuyObj_base {
   tipoPrecio;
   nombreTipoPrecio;
@@ -239,11 +241,11 @@ class cl_tipoPrecio extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.tipoPrecio;
+    this.keys = () => [this.tipoPrecio];
   }
 }
 
-/* CLASE MOVIMIENTO DE MATERIAL */
+/* 11 CLASE MOVIMIENTO DE MATERIAL */
 class cl_movMaterial extends PKuyObj_base {
   movID;
   indicadorEI;
@@ -264,11 +266,11 @@ class cl_movMaterial extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.movID;
+    this.keys = () => [this.movID];
   }
 }
 
-/* CLASE TIPO DE MOVIMIENTO DE MATERIAL */
+/* 12 CLASE TIPO DE MOVIMIENTO DE MATERIAL */
 class cl_tipoMovMat extends PKuyObj_base {
   tipoMov;
   indicadorEI;
@@ -280,11 +282,11 @@ class cl_tipoMovMat extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.tipoMov;
+    this.keys = () => [this.tipoMov];
   }
 }
 
-/* CLASE CÁLCULO DE STOCK */
+/* 13 CLASE CÁLCULO DE STOCK */
 class cl_calculoStock extends PKuyObj_base {
   calcID;
   almacenID;
@@ -299,11 +301,11 @@ class cl_calculoStock extends PKuyObj_base {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.calcID + this.almacenID + this.prodID;
+    this.keys = () => [this.calcID, this.almacenID, this.prodID];
   }
 }
 
-/* CLASE DIRECCIÓN */
+/* 14 CLASE DIRECCIÓN */
 class cl_direccion {
   dirID;
   dirID_modelo;
@@ -327,7 +329,7 @@ class cl_direccion {
     for (attrib in dataIn) {
       this[attrib] = dataIn[attrib];
     }
-    this.key = this.dirID;
+    this.keys = () => [this.dirID];
   }
   direccionCompleta() {
     var dirComp = this.dirCalle + ' ' + this.dirNum;
@@ -360,27 +362,132 @@ class cl_direccion {
     return dirComp;
   }
 }
+
+/* 15 CLASE COTIZACIÓN DE MONEDA */
+class cl_cotizacion extends PKuyObj_base {
+  cotizacionTS;
+  monedaDe;
+  monedaA;
+  factor;
+  constructor(dataIn) {
+
+    super(dataIn);
+    var attrib;
+    for (attrib in dataIn) {
+      this[attrib] = dataIn[attrib];
+    }
+    this.keys = () => [this.cotizacionTS, this.monedaDe, this.monedaA];
+  }
+}
+
+/* 16 CLASE UNIDAD DE MEDIDA */
+class cl_unidadMedida extends PKuyObj_base {
+  unidadMedida;
+  umCorto;
+  umSingular;
+  umPlural;
+
+  constructor(dataIn) {
+    super(dataIn);
+    var attrib;
+    for (attrib in dataIn) {
+      this[attrib] = dataIn[attrib];
+    }
+    this.keys = () => [this.unidadMedida];
+  }
+}
+
+/* 17 CLASE TERMINAL */
+class cl_terminal extends PKuyObj_base {
+  terminalID;
+  descripcion;
+
+  constructor(dataIn) {
+    super(dataIn);
+    var attrib;
+    for (attrib in dataIn) {
+      this[attrib] = dataIn[attrib];
+    }
+    this.keys = () => [this.terminalID];
+  }
+
+}
+
+/* CLASE UPDATELOG */
+class cl_updateLog extends PKuyObj_base {
+  updTS;
+  terminalID;
+  updRowRange;
+
+  constructor(dataIn) {
+    super(dataIn);
+    var attrib;
+    for (attrib in dataIn) {
+      this[attrib] = dataIn[attrib];
+    }
+    this.keys = () => [this.updTS, this.terminalID, this.updRowRange];
+  }
+
+}
+
+
 //*----------------------------------------------------------------------------------PKuy-1.0---*/
 //*--------------------------------------CLASES-------------------------------------------------*/
 //*--------------------------------------------MAESTROS-----------------------------------------*/
 //*---------------------------------------------------------------------------------------------*/
 
+class cl_maestro_base {
+  recordSet;
+
+  constructor() {
+  }
+  
+  /** Devuelve todos los elementos */
+  getAll() {
+    return this.recordSet;
+  }
+
+  /** Devuelve el último elemento de acuerdo al TS */
+  getLatest() {
+    return this.recordSet
+      .sort((a, b) => b.TS - a.TS)[0]; // Primer elemento del array ordenado inverso por TS
+  }
+
+  /** Verificar Objeto: completitud de Clave */
+  verify(obj) {
+    for (let i = 0; i < obj.keys().length; i++) {
+      const field = obj.keys()[i];
+      if (!field)
+        throw new Error(".add: faltan campos clave");
+    }
+  }
+
+  /** Verificar y Agregar */
+  add(obj) {
+    this.verify(obj);
+    this.recordSet.push(obj);
+  }
+
+
+}
+
 /* CLASE MAESTRO DE CLIENTES */
-class cl_maestroClientes {
+class cl_maestroClientes extends cl_maestro_base {
   static sheetName() { return 'cli_01' }
 
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var cliente_data;
     for (cliente_data in tableData) {
       this.add(new cl_cliente(tableData[cliente_data]));
     }
   }
-  add(cliente) {
-    if ((cliente.cliID === undefined) || (cliente.cliID === ''))
-      throw "Error: Cliente: falta cliID";
-    this.recordSet.push(cliente);
-  }
+  // add(cliente) {
+  //   if ((cliente.cliID === undefined) || (cliente.cliID === ''))
+  //     throw "Error: Cliente: falta cliID";
+  //   this.recordSet.push(cliente);
+  // }
 
   getModelos() {
     return this.recordSet.filter(cliente => cliente.esModelo);
@@ -396,13 +503,14 @@ class cl_maestroClientes {
 }
 
 /* CLASE MAESTRO DE PEDIDOS */
-class cl_maestroPedidos {
+class cl_maestroPedidos extends cl_maestro_base {
   static sheetName() { return 'ord_01' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var pedido_data;
     for (pedido_data in tableData) {
-      this.recordSet.push(new cl_pedido(tableData[pedido_data]));
+      this.add(new cl_pedido(tableData[pedido_data]));
     }
   }
   getByID(queryOrdID) {
@@ -414,202 +522,226 @@ class cl_maestroPedidos {
   getByProdID(queryProdID) {
     return this.recordSet.filter((pedido) => pedido.prodID == queryProdID);
   }
-  getAll(){
-    return this.recordSet;
-  }
 }
 
 /* CLASE MAESTRO DE STATUS DE PEDIDOS */
-class cl_statusPedidos {
+class cl_statusPedidos extends cl_maestro_base {
   static sheetName() { return 'ord_status' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var statusPedido_data;
     for (statusPedido_data in tableData) {
-      this.recordSet.push(new cl_statusPedido(tableData[statusPedido_data]));
+      this.add(new cl_statusPedido(tableData[statusPedido_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE TIPO DE STATUS DE PEDIDOS */
-class cl_tiposStatusPedido {
+class cl_tiposStatusPedido extends cl_maestro_base {
   static sheetName() { return 'status_tipo' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var tipoStatusPedido_data;
     for (tipoStatusPedido_data in tableData) {
-      this.recordSet.push(new cl_tipoStatusPedido(tableData[tipoStatusPedido_data]));
+      this.add(new cl_tipoStatusPedido(tableData[tipoStatusPedido_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE MAESTRO DE ALMACENES */
-class cl_maestroAlmacenes {
+class cl_maestroAlmacenes extends cl_maestro_base {
   static sheetName() { return 'almacen_01' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var almacen_data;
     for (almacen_data in tableData) {
-      this.recordSet.push(new cl_almacen(tableData[almacen_data]));
+      this.add(new cl_almacen(tableData[almacen_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE MAESTRO DE PUNTOS DE DESPACHO */
-class cl_maestroPtosDespacho {
+class cl_maestroPtosDespacho extends cl_maestro_base {
   static sheetName() { return 'ptoDespacho_01' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var ptoDespacho_data;
     for (ptoDespacho_data in tableData) {
-      this.recordSet.push(new cl_ptoDespacho(tableData[ptoDespacho_data]));
+      this.add(new cl_ptoDespacho(tableData[ptoDespacho_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE MAESTRO DE MEDIOS DE PAGO */
-class cl_maestroMediosPago {
+class cl_maestroMediosPago extends cl_maestro_base {
   static sheetName() { return 'medioPago_01' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var medioPago_data;
     for (medioPago_data in tableData) {
-      this.recordSet.push(new cl_medioPago(tableData[medioPago_data]));
+      this.add(new cl_medioPago(tableData[medioPago_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE MAESTRO DE PRODUCTOS */
-class cl_maestroProductos {
+class cl_maestroProductos extends cl_maestro_base {
   static sheetName() { return 'prod_01' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var producto_data;
     for (producto_data in tableData) {
-      this.recordSet.push(new cl_producto(tableData[producto_data]));
+      this.add(new cl_producto(tableData[producto_data]));
     }
   }
   getByProdID(prodID) {
   }
-  getAll(){
-    return this.recordSet;
-  }
 }
 
 /* CLASE MAESTRO DE PRECIOS */
-class cl_maestroPrecios {
+class cl_maestroPrecios extends cl_maestro_base {
   static sheetName() { return 'prod_precios' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var productoPrecio_data;
     for (productoPrecio_data in tableData) {
-      this.recordSet.push(new cl_precioProducto(tableData[productoPrecio_data]));
+      this.add(new cl_precioProducto(tableData[productoPrecio_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE TIPOS DE PRECIO */
-class cl_tiposPrecios {
+class cl_tiposPrecios extends cl_maestro_base {
   static sheetName() { return 'tipo_precio' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var tipoPrecio_data;
     for (tipoPrecio_data in tableData) {
-      this.recordSet.push(new cl_tipoPrecio(tableData[tipoPrecio_data]));
+      this.add(new cl_tipoPrecio(tableData[tipoPrecio_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE MAESTRO DE MOVIMIENTOS DE MATERIAL */
-class cl_maestroMovimientos {
+class cl_maestroMovimientos extends cl_maestro_base {
   static sheetName() { return 'mov_01' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var movimientos_data;
     for (movimientos_data in tableData) {
-      this.recordSet.push(new cl_movMaterial(tableData[movimientos_data]));
+      this.add(new cl_movMaterial(tableData[movimientos_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE TIPOS DE MOVIMIENTO DE MATERIAL */
-class cl_tiposMovimiento {
+class cl_tiposMovimiento extends cl_maestro_base {
   static sheetName() { return 'movimientos_tipo' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var tiposMovimiento_data;
     for (tiposMovimiento_data in tableData) {
-      this.recordSet.push(new cl_tipoMovMat(tableData[tiposMovimiento_data]));
+      this.add(new cl_tipoMovMat(tableData[tiposMovimiento_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE MAESTRO DE CALCULOS DE STOCK */
-class cl_maestroCalculosStock {
+class cl_maestroCalculosStock extends cl_maestro_base {
   static sheetName() { return 'calculos_stock' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var calculosStock_data;
     for (calculosStock_data in tableData) {
-      this.recordSet.push(new cl_calculoStock(tableData[calculosStock_data]));
+      this.add(new cl_calculoStock(tableData[calculosStock_data]));
     }
-  }
-  getAll(){
-    return this.recordSet;
   }
 }
 
 /* CLASE MAESTRO DE DIRECCIONES */
-class cl_maestroDirecciones {
+class cl_maestroDirecciones extends cl_maestro_base {
   static sheetName() { return 'dir_01' };
   constructor(tableData) {
-    this.recordSet = new Array();
+    super(tableData);
+    this.recordSet = [];
     var direccion_data;
     for (direccion_data in tableData) {
       this.add(new cl_direccion(tableData[direccion_data]));
     }
   }
-  getAll(){
-    return this.recordSet;
-  }
   getByID(queryDirID) {
     return this.recordSet.find(direccion => direccion.dirID == queryDirID);
   }
-  add(direccion) {
-    if ((direccion.dirID === undefined) || (direccion.dirID === ''))
-      throw "Error: Direccion: falta dirID";
-    this.recordSet.push(direccion);
+  // add(direccion) {
+  //   if ((direccion.dirID === undefined) || (direccion.dirID === ''))
+  //     throw "Error: Direccion: falta dirID";
+  //   this.recordSet.push(direccion);
+  // }
+}
+
+/* CLASE COTIZACIÓNES */
+class cl_maestroCotizaciones extends cl_maestro_base {
+  static sheetName() { return 'cotizaciones_01' };
+  constructor(tableData) {
+    super(tableData);
+    this.recordSet = [];
+    var cotizaciones_data;
+    for (cotizaciones_data in tableData) {
+      this.add(new cl_cotizacion(tableData[cotizaciones_data]));
+    }
+  }
+  getLast(monedaDe, monedaA) {
+    return this.recordSet
+      .filter((cotizacion) => ((cotizacion.monedaDe === monedaDe) && cotizacion.monedaA === monedaA))
+      .sort((a, b) => b.cotizacionTS - a.cotizacionTS)[0]; // Primer elemento del array ordenado inverso por cotizacionTS
+  }
+  // add(cotizacion) {
+  //   if (!cotizacion.cotizacionTS || !cotizacion.monedaDe || !cliente.monedaA 7))
+  //   throw new Error("Cotización .add: falta clave");
+  //   this.add(cotizacion);
+  // }
+
+}
+
+/* CLASE UNIDADES DE MEDIDA */
+class cl_unidadesMedida extends cl_maestro_base {
+  static sheetName() { return 'unidadesMedida_01' };
+  constructor(tableData) {
+    super(tableData);
+    this.recordSet = [];
+    var unidadesMedida_data;
+    for (unidadesMedida_data in tableData) {
+      this.add(new cl_unidadMedida(tableData[unidadesMedida_data]));
+    }
   }
 }
+
+/* CLASE MAESTRO DE TERMINALES */
+class cl_maestroTerminales extends cl_maestro_base {
+  static sheetName() { return 'terminal_01' }
+
+  constructor(tableData) {
+    super(tableData);
+    this.recordSet = [];
+    var terminal_data;
+    for (terminal_data in tableData) {
+      this.add(new cl_terminal(tableData[terminal_data]));
+    }
+  }
+}
+
+
 // gr.Clientes
-// unidades de medida
-// cotizacion
 // contabilizacion
 // balance

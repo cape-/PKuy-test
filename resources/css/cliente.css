@@ -1,128 +1,205 @@
-html, body {
-    height: 100%;
-    font-family: Google Sans, Noto Sans, sans-serif;
+html,
+body {
+  height: 100%;
+  /* font-family: Google Sans, Noto Sans, sans-serif; */
+  font-family: "Baloo 2";
+}
+
+.splash {
+  display: none;
+}
+
+[ng-cloak].splash {
+  display: block !important;
 }
 
 form {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
-#loadingCircle{
-    position: fixed;
-    z-index: 99;
-    top: 18px;
-    right: 30px;
+#loadingCircle {
+  position: fixed;
+  z-index: 99;
+  top: 18px;
+  right: 30px;
 }
 
-i.material-icons.icon-big
-{
-    font-size: 48px;
+i.material-icons.icon-big {
+  font-size: 48px;
+}
+
+h2.cabecera-app {
+  font-size: 48px;
 }
 
 md-icon.contacto-icon {
-    color: #6B4;
-    font-size: 48px;
-    height: auto;
-    width: auto
+  color: #6b4;
+  font-size: 48px;
+  height: auto;
+  width: auto;
 }
 
 md-icon.cliente-icon {
-    color: #FB8C00;
-    font-size: 48px;
-    height: auto;
-    width: auto
+  color: #fb8c00;
+  font-size: 48px;
+  height: auto;
+  width: auto;
+}
+
+.principalWidget {
+  padding: 2px 16px;
+  margin: 0px 8px;
+  background-color: rgb(66, 66, 66);
+  border-radius: 6px;
+  overflow: hidden;
+  text-align: right;
+}
+.principalWidget h2 {
+  margin: 0 0 8px 0;
+}
+.principalWidget h4 {
+  margin: 0;
+  line-height: normal;
+  font-weight: normal;
+}
+.colapsableWidget {
+  max-height: calc(2em + 10px);
+  line-height: 2em;
+  padding-top: 2px;
+}
+.colapsableWidget > * {
+  visibility: hidden;
+}
+.colapsableWidget > .fixedColapsableWidget {
+  visibility: visible;
+}
+.colapsableWidget:hover {
+  max-height: 50%;
+}
+.colapsableWidget:hover > * {
+  visibility: visible;
+}
+h2.fixedColapsableWidget {
+  font-weight: normal;
+  font-size: 1.4em;
+}
+h2.fixedColapsableWidget strong {
+  font-weight: bold;
+  color: #aaa;
+}
+h2.fixedColapsableWidget span {
+  font-size: 12px;
+  line-height: 4px;
+  color: #aaa;
+}
+h2.fixedColapsableWidget i.material-icons {
+  position: relative;
+  top: 9px;
+  padding-right: 8px;
 }
 
 .PkuyConsola {
-    border-top: solid 1px #202020;
-    background-color: #222;
-    position: fixed;
-    width: 100%;
-    z-index: 99;
-    bottom: 0;
-    font-family: monospace;
-    max-height: 1.6em;
-    padding-top: 0.2em;
-    overflow: hidden;
-    transition: max-height 0.5s ease-out;
+  border-top: solid 1px #202020;
+  background-color: #222;
+  position: fixed;
+  width: 100%;
+  z-index: 99;
+  bottom: 0;
+  font-family: monospace;
+  max-height: 1.6em;
+  padding-top: 0.2em;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
 }
 
 .PkuyConsola:hover {
-    max-height: 30%;
-    overflow: auto;
-    transition: max-height 0.25s ease-in;
+  max-height: 30%;
+  overflow: auto;
+  transition: max-height 0.25s ease-in;
 }
 
 .PkuyConsola div.userDataContainer {
-    color: burlywood;
-    margin-left: 10px;
+  color: burlywood;
+  margin-left: 10px;
 }
 
 .PkuyConsola div.cotizacionesContainer {
-    text-align: right;
-    color: palevioletred
+  text-align: right;
+  color: palevioletred;
 }
 
 .PkuyConsola div.tituloContainer span {
-    font-weight: bolder;
-    color: coral;
-    margin: 0 16px 0 6px;
+  font-weight: bolder;
+  color: coral;
+  margin: 0 16px 0 6px;
 }
 
 .PkuyConsola div.consolaContainer span {
-    display: block;
-    color: mediumseagreen;
+  display: block;
+  color: mediumseagreen;
 }
 
 .PkuyConsola div.consolaContainer span:hover {
-    background-color: #233;
+  background-color: #233;
 }
 
 .PkuyConsola div.consolaContainer span.warn {
-    display: block;
-    color: gold;
+  display: block;
+  color: gold;
 }
 
 .PkuyConsola div.consolaContainer span.error {
-    color: crimson;
-    text-decoration: underline dotted;
+  color: crimson;
+  text-decoration: underline dotted;
 }
 
-md-input-container.md-block{
-    margin-top: 0px;
-    margin-bottom: 0px;
+md-input-container.md-block {
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 .md-table-input {
-    background-color: #333;
-    border: solid 1px #222;
-    border-radius: 5px;
-    height: 1.8em;
-    color: #fff;
-    padding: 0 6px;
+  background-color: #444;
+  border: solid 0px #222;
+  border-radius: 2px;
+  height: 1.6em;
+  color: #fff;
+  padding: 0 4px;
 }
 
-div.md-input-message-animation{
-    margin-bottom: 18px;
+div.md-input-message-animation {
+  margin-bottom: 18px;
 }
 
 table {
-    table-layout: fixed;
-    width: 100%;
+  table-layout: fixed;
+  width: 100%;
 }
 /* tbody{
 } */
-tr{
-    display: flex;
-    flex-flow: row;    
+tr {
+  display: flex;
+  flex-flow: row;
 }
-td, th {
-    flex: 1 1 100px;
+td,
+th {
+  flex: 1 1 100px;
 }
-input, select{
-    display: inline;
-    width: 100%;
+input,
+select {
+  display: inline;
+  width: 100%;
 }
-div.table-scroll-div{
-    height: 150px;
-    overflow: auto;
+div.table-scroll-div {
+  max-height: 135px;
+  overflow: auto;
+}
+
+div.table-scroll-div::-webkit-scrollbar {
+  width: 2px;
+}
+
+.grilla-presentaciones-btn {
+  min-height: 0em !important;
+  max-height: 1.6em !important;
+  padding-top: 2px !important;
 }

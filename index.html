@@ -9,23 +9,34 @@
     <link rel="shortcut icon" type="image/png" href="/resources/img/pkuy-icon-1x.png" />
     <!-- Angular Material style sheet -->
     <link rel="stylesheet" href="/libs/angular_material/1.1.12/angular-material.min.css">
+    <link rel="stylesheet" href="/resources/fonts/material-icons/material-icons.css">
+    <link rel="stylesheet" href="/resources/fonts/Roboto/roboto.css">
+    <link rel="stylesheet" href="/resources/fonts/Inter/inter.css">
+    <link rel="stylesheet" href="/resources/fonts/baloo-2/baloo-2.css">
     <link rel="stylesheet" href="/resources/css/cliente.css">
     <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic"> -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
 </head>
 
-<body ng-app="PkuyApp" ng-cloak>
-    <div ng-controller="main" flex>
+<body ng-app="PkuyApp">
+    <div class="splash" ng-cloak="" style="width: 100%;">
+        <p
+            style="height: 50%;vertical-align: bottom; text-align: center; font-family: monospace; font-size: 40pt; line-height: 10em;">
+            PkuyApp Cargando
+        </p>
+    </div>
+
+    <div ng-controller="main" flex ng-cloak="">
         <md-toolbar class="md-menu-toolbar" ng-cloak>
             <div layout="row">
                 <md-toolbar-filler layout layout-align="center center">
                     <i class="material-icons icon-big">blur_on</i>
                 </md-toolbar-filler>
                 <div>
-                    <h2 class="md-toolbar-tools">PkuyApp</h2>
+                    <h2 class="md-toolbar-tools cabecera-app">PkuyApp</h2>
                     <md-menu-bar>
                         <md-menu ng-repeat="menu in appMenu">
-                            <md-button ng-click="$mdMenu.open($event)">
+                            <md-button ng-click="$mdMenu.open($event)" ng-disabled="pkuyLoading">
                                 {{ menu.titulo }}
                             </md-button>
                             <md-menu-content>
@@ -61,7 +72,46 @@
             <span flex></span>
         </div> -->
         <!-- CONSOLA -->
-        <md-content layout="row" layout-align="start center" layout-padding>
+        <md-content layout="column" layout-align="start center" layout-padding>
+            <div class="widgetRow" flex="25" layout="row">
+                <!-- WIDGET -->
+                <div class="principalWidget colapsableWidget" ng-show="dolar">
+                    <h2 class="fixedColapsableWidget">
+                        <i class="material-icons">monetization_on</i>
+                        <strong>Oficial </strong>{{ (dolar.oficial.venta | currency:'$') }}
+                        <strong> Blue </strong>{{ (dolar.blue.venta | currency:'$')  }}
+                        <br>
+                        <span>{{ dolarActualizadoTxt }}</span>
+                    </h2>
+                    <h4>Oficial Compra: {{ (dolar.oficial.compra | currency:'$') }}</h4>
+                    <h4>Oficial Venta: {{ (dolar.oficial.venta | currency:'$') }}</h4>
+                    <h4>Blue Compra: {{ (dolar.blue.compra | currency:'$') }}</h4>
+                    <h4>Blue Venta: {{ (dolar.blue.venta | currency:'$') }}</h4>
+                </div>
+                <!-- WIDGET -->
+                <div class="principalWidget colapsableWidget" ng-show="currentUser">
+                    <h2 class="fixedColapsableWidget">
+                        <i class="material-icons">account_circle</i>
+                        {{ currentUser.nombreCompleto }}
+                        <br>
+                        <span>Log-in {{ currentUser.email }}</span>
+                    </h2>
+                    <h4>ID@terminal</h4>
+                    <h4>{{ currentUser.id }}@{{ thisTerminalID}}</h4>
+                </div>
+                <div flex=""></div>
+            </div>
+            <div class="widgetRow" flex="25" layout="row">
+                <div class="principalWidget colapsableWidget" ng-show="">
+                </div>
+                <div flex=""></div>
+            </div>
+            <div class="widgetRow" flex="25" layout="row">
+                <div flex=""></div>
+            </div>
+            <div class="widgetRow" flex="25" layout="row">
+                <div flex=""></div>
+            </div>
             <!-- <p class="">PkuyApp Log</p>
             <h5>Off</h5>
             <md-switch ng-model="pkuyLoading" aria-label="Toggle Progress Circular Indicators">
@@ -76,13 +126,6 @@
             </div>
             <div class="consolaContainer" id="consolaDiv" flex>
             </div>
-            <div class="cotizacionesContainer" ng-show="dolar">
-                {{ 'Oficial: ' + dolar.oficial.venta + ' | Blue:' + dolar.blue.venta  }}
-                <br> {{ 'Oficial Compra: $' + dolar.oficial.compra }}
-                <br> {{ 'Oficial Venta: $' + dolar.oficial.venta }}
-                <br> {{ 'Blue Compra: $' + dolar.blue.compra }}
-                <br> {{ 'Blue Venta: $' + dolar.blue.venta }}
-            </div>
             <div class="userDataContainer" ng-show="currentUser">
                 {{ currentUser.nombre + ' (' + currentUser.email + ')'}}
             </div>
@@ -90,7 +133,10 @@
 
     </div>
 
-    <!-- Angular Material requires Angular.js Libraries -->
+    <!-- jQuery Library -->
+    <!-- <script src="/libs/jquery/jquery-3.4.1.slim.min.js"></script> -->
+
+    <!-- AngularJS Libraries -->
     <!-- TODO remover scipts innecesarios -->
     <script src="/libs/angularjs/1.7.6/angular.min.js"></script>
     <script src="/libs/angularjs/1.7.6/angular-animate.min.js"></script>

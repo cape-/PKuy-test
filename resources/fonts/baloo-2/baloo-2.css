@@ -1,0 +1,8 @@
+@font-face {
+  font-family: "Baloo 2";
+  font-style: normal;
+  font-weight: 400;
+  src:  local('Baloo 2 Regular'), 
+        local('Baloo2-Regular'),
+        url('baloo-2.woff2') format('woff2');
+}

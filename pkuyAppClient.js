@@ -16,7 +16,7 @@ angular.module('PkuyApp', ['ngMaterial'])
   /** MAIN CONTROLLER                                      */
   /**                                                      */
   /**----------------------------------------------------- */
-  .controller('main', function ($scope, $rootScope, $mdDialog, $http, PkuyLink) {
+  .controller('main', function ($scope, $rootScope, $filter, $interval, $mdDialog, $http, PkuyLink) {
 
     // Obtener Permiso para enviar Notifiaciones
     Notification.requestPermission();
@@ -30,12 +30,43 @@ angular.module('PkuyApp', ['ngMaterial'])
     $scope.onDBLoaded = function () {
       // Actualizar Vista
       $rootScope.currentUser = PkuyLink.currentUser;
+
+      // Backup en localStorage
+      PkuyLink.log("Backup to localStorage");
+      // $interval(PkuyLink.saveLocalDB, 15 * 1000);
+      PkuyLink.saveLocalDB();
+
       $rootScope.slo();
       $scope.$apply();
     }
-    
+
     $scope.onCotizacionesLoaded = function () {
-      $rootScope.dolar = PkuyLink.dolar;
+      $rootScope.dolar = PkuyLink.db.dolar;
+
+      $scope.antiguedadActualizacion = {
+        MinTot: Math.floor((Date.now() - $rootScope.dolar.blue.fecha) / 1000 / 60)
+      }
+
+      $scope.antiguedadActualizacion.fechaTxt = $filter('date')($rootScope.dolar.blue.fecha, "dd/MM/yy ' a las ' h:mma");
+      $scope.antiguedadActualizacion.hh = Math.floor($scope.antiguedadActualizacion.MinTot / 60);
+      $scope.antiguedadActualizacion.mm = $scope.antiguedadActualizacion.MinTot - $scope.antiguedadActualizacion.hh * 60
+
+      if ($scope.antiguedadActualizacion.hh < 1) { // Menos de 1 hora
+        $rootScope.dolarActualizadoTxt = "Cotización actualizada hace " + $scope.antiguedadActualizacion.mm + " minutos";
+
+      } else if ($scope.antiguedadActualizacion.hh < 10) { // Entre 1 y 9 horas 
+        $rootScope.dolarActualizadoTxt = "Cotización actualizada hace " + $scope.antiguedadActualizacion.hh
+          + (($scope.antiguedadActualizacion.hh == 1) ? " hora" : " horas");
+
+        if ($scope.antiguedadActualizacion.mm != 0)
+          $rootScope.dolarActualizadoTxt += " y " + $scope.antiguedadActualizacion.mm
+            + (($scope.antiguedadActualizacion.mm == 1) ? " minuto" : " minutos");
+
+      } else { // Más de 10 horas de antiguedad
+        $rootScope.dolarActualizadoTxt = "Cotización actualizada el " + $scope.antiguedadActualizacion.fechaTxt;
+
+      }
+
       $scope.$apply();
     }
 
@@ -54,7 +85,7 @@ angular.module('PkuyApp', ['ngMaterial'])
         ]
       },
       {
-        titulo: '1.Consultas',
+        titulo: '1 . Consultas',
         entradas: [
           { titulo: 'Actualizar Contactos Google', do: function () { PkuyLink.cargarContactosGoogle(true) } },
           { titulo: 'Importar Clientes desde Contactos Google', do: function ($event) { $scope.importarClientes($event) } },
@@ -67,22 +98,23 @@ angular.module('PkuyApp', ['ngMaterial'])
         ]
       },
       {
-        titulo: '2.Crear',
+        titulo: '2 . Crear',
         entradas: [
           { titulo: 'Nuevo Cliente', do: function () { $scope.crearNuevoCliente() } },
           { titulo: 'Nuevo Producto', do: function () { $scope.crearNuevoProducto() } },
         ]
       },
       {
-        titulo: '3.Ayuda',
+        titulo: '3 . Ayuda',
         entradas: [
           { titulo: 'Reportar un Error', do: function () { $scope.reportarBug() } },
         ]
       },
       {
-        titulo: 'X.Admin',
+        titulo: 'X . Admin',
         entradas: [
           { titulo: 'Borrar localStorage', do: function () { localStorage.clear() } },
+          { titulo: 'Abrir PkuyDB', do: function () { window.open("https://docs.google.com/spreadsheets/d/" + PkuyLink.dbSpreadsheet) } },
           { titulo: 'BackUp PkuyDB', do: function () { PkuyLink.backupPkuyDB() } }
         ]
       }
@@ -352,9 +384,23 @@ angular.module('PkuyApp', ['ngMaterial'])
 
     $scope.agregarPresentacion = function () {
       let i = $scope.presentaciones.push(Object.assign({}, $scope.nuevaPresentacion));
-      $scope.presentaciones[--i].denominacion = $scope.nuevoProducto.descripcion;
-      $scope.$watch('presentaciones[' + i + '].valor', $scope.calcularPrecioPresentacion);
-      $scope.$watch('presentaciones[' + i + '].tipoPrecio', $scope.calcularPrecioPresentacion);
+
+      $scope.presentaciones[--i].denominacion =
+        $scope.nuevoProducto.descripcion
+        + ' x' + $scope.presentaciones[i].cantPresentacion
+        + ' ' + $scope.nuevoProducto.UM;
+
+      $scope.calcularPreciosPresentaciones();
+
+      $scope.$watchCollection('presentaciones[' + i + ']',
+        (despues, antes) => {
+          if ((despues.valor !== antes.valor)
+            || (despues.tipoPrecio !== antes.tipoPrecio)
+            || (despues.redondeo !== antes.redondeo))
+            $scope.calcularPreciosPresentaciones();
+          if (despues.cantPresentacion !== antes.cantPresentacion)
+            $scope.actualizarDenominaciones(despues.cantPresentacion, antes.cantPresentacion, i);
+        })
     };
 
     $scope.quitarPresentacion = function () {
@@ -363,31 +409,267 @@ angular.module('PkuyApp', ['ngMaterial'])
     };
 
     /** Clic en Crear */
-    $scope.crearProducto = async function (nuevoCli, nuevaDir) {
+    $scope.crearProducto = async function (nuevoProducto, presentaciones) {
+
+      // Mapeo Obj.local a DB Obj (cl_producto)
+      var productosNuevos = [new cl_producto(
+        {
+          prodID: nuevoProducto.prodID,
+          descripcion: nuevoProducto.descripcion,
+          origen: nuevoProducto.origen,
+          prodID_modelo: '',
+          esModelo: true,
+          cantPresentacion: 0,
+          UM: nuevoProducto.UM,
+          mlUrl: ''
+
+        }
+      )];
+
+      var preciosNuevos = [];
+      if (nuevoProducto.tipoPrecio)
+        preciosNuevos.push(new cl_precioProducto(
+          {
+            prodID: nuevoProducto.prodID,
+            tipoPrecio: nuevoProducto.tipoPrecio,
+            inicioTS: Date.now(),
+            valor: nuevoProducto.precioReferenciaUM,
+            precioCalculado: nuevoProducto.precioReferenciaUM,
+            moneda: nuevoProducto.moneda,
+            cotizacionMoneda: nuevoProducto.cotizacionMoneda,
+          })
+        );
+
+      // Mapeo Array Obj.locales a DB Obj (cl_producto)
+      presentaciones.map((presentacion) => {
+        productosNuevos.push(new cl_producto(
+          {
+            prodID: presentacion.prodID,
+            descripcion: presentacion.denominacion,
+            origen: nuevoProducto.origen,
+            prodID_modelo: nuevoProducto.prodID,
+            esModelo: false,
+            cantPresentacion: presentacion.cantPresentacion,
+            UM: nuevoProducto.UM,
+            mlUrl: ''
+          }
+        ));
+        preciosNuevos.push(new cl_precioProducto(
+          {
+            prodID: presentacion.prodID,
+            tipoPrecio: presentacion.tipoPrecio,
+            inicioTS: Date.now(),
+            valor: presentacion.valor,
+            precioCalculado: presentacion.precioCalculado,
+            moneda: presentacion.moneda,
+            cotizacionMoneda: nuevoProducto.cotizacionMoneda,
+          })
+        );
+
+      });
+
+      console.debug(nuevoProducto);
+      console.debug(presentaciones);
+      console.debug(productosNuevos);
+      console.debug(preciosNuevos);
+
       $rootScope.lo();
-      var ProductoCreado = await PkuyLink.nuevoProducto(nuevoCli, nuevaDir);
+
+      var productosCreados = [];
+      var prodIDModelo;
+      for (let i = 0; i < productosNuevos.length; i++) {
+        const prodNuevo = productosNuevos[i];
+        if (!prodNuevo.esModelo)  // Linkear presentaciones (Productos esModelo == false) a producto modelo
+          prodNuevo.prodID_modelo = prodIDModelo;
+        /* Grabar en BD */
+        var prodCreado = await PkuyLink.nuevoProducto(prodNuevo);
+
+        if (prodNuevo.esModelo)  // Almacenar prodID del producto modelo
+          prodIDModelo = prodCreado.prodID;
+        productosCreados.push(prodCreado);
+
+      }
+      var preciosCreados = [];
+      for (let j = 0; j < productosCreados.length; j++) {
+        const productoCreado = productosCreados[j];
+        const precioNuevo = preciosNuevos[j];
+
+        precioNuevo.prodID = productoCreado.prodID;
+        var precioCreado = await PkuyLink.nuevoPrecio(precioNuevo);
+
+        preciosCreados.push(precioCreado);
+      }
+      console.debug(productosCreados, preciosCreados);
+      // var ProductoCreado = await PkuyLink.nuevoProducto
       $rootScope.slo();
       $mdDialog.hide();
 
     }
 
+    $scope.browseFotos = function () {
+      document.getElementById('fotosProducto').click();
+    }
+
+    $scope.updateFotosShow = function () {
+      console.log("updateFotosShow called");
+
+      var files = document.getElementById('fotosProducto').files;
+
+      if (!files.length)
+        return;
+      else if (files.length === 1)
+        $scope.fotosProductoShow = "1 archivo seleccionado: ";
+      else
+        $scope.fotosProductoShow = "" + files.length + " archivos seleccionados: ";
+
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        if (i)
+          $scope.fotosProductoShow += ", ";
+        $scope.fotosProductoShow += '"' + f.name + '"'
+      }
+      $scope.$apply();
+    }
+
+    /** Subir fotos del producto */
+    $scope.imageBuffer = [];
+    $scope.uploadFotos = function () {
+
+      /** Escalar Imagen */
+      /** https://stackoverflow.com/questions/23945494/use-html5-to-resize-an-image-before-upload */
+      
+      var files = document.getElementById('fotosProducto').files;
+      console.log(files);
+
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        var r = new FileReader();
+
+        r.onloadend = function (e) {
+          var data = e.target.result;
+          $scope.imageBuffer.push(data);
+          console.debug(e);
+          // DRIVE API Call
+
+        }
+
+        r.readAsBinaryString(f);
+
+      }
+    }
     /** Calcular Precio de cada Presentación */
-    $scope.calcularPrecioPresentacion = function () {
+    $scope.calcularPreciosPresentaciones = function () {
       for (let i = 0; i < $scope.presentaciones.length; i++) {
 
         presentacion = $scope.presentaciones[i];
+
         var selectedTipoPrecio = $scope.tiposPrecio
           .find(tiposPrecio => tiposPrecio.tipoPrecio == presentacion.tipoPrecio);
 
         if (selectedTipoPrecio !== undefined)
           presentacion.moneda = selectedTipoPrecio.moneda;
 
-        if (presentacion.moneda == '%')
-          presentacion.precioCalculado = $scope.nuevoProducto.precioReferenciaUM * presentacion.valor / 100;
-        else
+        if (presentacion.tipoPrecio == 'PVP') // PVP: Precio fijo en AR$
           presentacion.precioCalculado = presentacion.valor;
+
+        else if (presentacion.tipoPrecio == 'PVD') // PVD: Precio fijo en USD
+          presentacion.precioCalculado = presentacion.valor;
+
+        else if (presentacion.tipoPrecio == 'PAD') // Precio en USD convertido a AR$
+          presentacion.precioCalculado = PkuyLink.convertUSDtoARS(presentacion.valor);
+
+        else if (presentacion.tipoPrecio == 'PAB') // Precio en USD Blue convertido a AR$
+          presentacion.precioCalculado = PkuyLink.convertUSDBtoARS(presentacion.valor);
+
+        else if (presentacion.tipoPrecio == 'PPM')  // % del Precio Modelo U/M en/convertido a AR$
+        {
+          if ($scope.nuevoProducto.tipoPrecio == 'PMP') //PMP	Precio Modelo U/M AR$
+            presentacion.precioCalculado = $scope.nuevoProducto.precioReferenciaUM * presentacion.valor / 100;
+
+          else if ($scope.nuevoProducto.tipoPrecio == 'PMD') // PMD	Precio Modelo U/M (cotiz. USD)
+            presentacion.precioCalculado = PkuyLink.convertUSDtoARS($scope.nuevoProducto.precioReferenciaUM) * presentacion.valor / 100;
+
+          else if ($scope.nuevoProducto.tipoPrecio == 'PMB') // PMB	Precio Modelo U/M (cotiz. USD Blue)
+            presentacion.precioCalculado = PkuyLink.convertUSDBtoARS($scope.nuevoProducto.precioReferenciaUM) * presentacion.valor / 100;
+
+          else
+            presentacion.precioCalculado = -1.00;
+        }
+
+        else
+          presentacion.precioCalculado = -1.00;
+
+        /* REDONDEO */
+        if (presentacion.redondeo)
+          presentacion.precioFinal = Math.ceil(presentacion.precioCalculado / presentacion.redondeo) * presentacion.redondeo;  // Redondear Precio
+
+        else
+          presentacion.precioFinal = presentacion.precioCalculado;   // Precio Exacto
+
       }
     }
+
+    $scope.calcularPrecioProducto = function () {
+
+      /* COTIZACIÓN MONEDA */
+      if ($scope.nuevoProducto.moneda == 'ARS') // Peso Argentino
+        $scope.nuevoProducto.cotizacionMoneda = 1.00;
+
+      else if ($scope.nuevoProducto.moneda == 'USD') // Dólar
+        $scope.nuevoProducto.cotizacionMoneda = $rootScope.dolar.oficial.venta;
+
+      else if ($scope.nuevoProducto.moneda == 'USD-B') //Dolar Blue
+        $scope.nuevoProducto.cotizacionMoneda = $rootScope.dolar.blue.venta;
+
+      $scope.calcularPreciosPresentaciones()
+    }
+
+    $scope.actualizarDenominaciones = function (despues, antes, i = null) {
+
+      if (despues === undefined)
+        despues = "?";
+
+      if (antes === undefined)
+        antes = "?";
+
+      if (i === null) {
+        for (i = 0; i < $scope.presentaciones.length; i++) {
+          const presentacion = $scope.presentaciones[i];
+          presentacion.denominacion = presentacion.denominacion.replace(antes, despues);
+        }
+      }
+      else {
+        const presentacion = $scope.presentaciones[i];
+        presentacion.denominacion = presentacion.denominacion.replace(antes, despues);
+      }
+    }
+
+    $scope.redondearPrecio = (precio) => Math.ceil(precio / 5) * 5;
+
+    $scope.$watchCollection('nuevoProducto',
+      (despues, antes) => {
+        // Sub Watch: Precio de Referencia o Tipo de Precio
+        if ((despues.precioReferenciaUM !== antes.precioReferenciaUM)
+          || (despues.tipoPrecio !== antes.tipoPrecio))
+          // Calcular precios
+          $scope.calcularPrecioProducto();
+
+        // Sub Watch: Descripcion
+        if (despues.descripcion !== antes.descripcion) {
+          // Actualizar nombre producto
+          $scope.actualizarDenominaciones(despues.descripcion, antes.descripcion);
+
+          // Actualizar prod_ID
+
+        }
+
+        if (despues.prodID !== antes.prodID)
+          $scope.presentaciones = $scope.presentaciones.map((presentacion, i) => {
+            presentacion.prodID = despues.prodID.substr(0, (despues.prodID.length - 4)) + ('' + i).padStart(4, '0');
+            return presentacion;
+          });
+
+      });
 
     /** Definiciones del Controller */
     $scope.titulo = "Alta nuevo Producto"
@@ -399,13 +681,11 @@ angular.module('PkuyApp', ['ngMaterial'])
       'descripcion': '',
       'origen': '',
       'UM': '',
-      'precioReferenciaUM': 1.00,
       'tipoPrecio': '',
+      'precioReferenciaUM': 1.00,
+      'moneda': '',
       'cotizacionMoneda': 1.00
     };
-    // Calcular precios
-    $scope.$watch('nuevoProducto.precioReferenciaUM', $scope.calcularPrecioPresentacion);
-    $scope.$watch('nuevoProducto.tipoPrecio', $scope.calcularPrecioPresentacion);
 
     $scope.nuevaPresentacion = {
       'denominacion': '',
@@ -414,7 +694,9 @@ angular.module('PkuyApp', ['ngMaterial'])
       'valor': 100.00,
       'moneda': '',
       'tipoPrecio': 'PPM',
-      'precioCalculado': 1.00
+      'precioCalculado': 0.00,
+      'precioFinal': 0.00,
+      'redondeo': 0
     };
 
     $scope.presentaciones = [];

@@ -13,13 +13,33 @@
         <md-dialog-content>
             <md-content layout-padding>
                 <div>
-                    <form ng-cloak name="crearNuevoProducto" 
-                    ng-submit="crearProducto(nuevoProducto, presentaciones)">
+                    <form ng-cloak name="crearNuevoProducto" ng-submit="crearProducto(nuevoProducto, presentaciones)">
                         <h4>Datos del Producto</h4>
                         <div layout-gt-sm="row">
-                            <md-input-container class="md-block" flex-gt-sm>
+                            <md-input-container class="md-block" flex-gt-sm="55">
                                 <label>Descripción</label>
                                 <input required name="descripcion" ng-model="nuevoProducto.descripcion" type="text">
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm>
+                                <label>Fotos</label>
+                                <input type="text" id="fotosProductoShow" name="fotosProductoShow"
+                                    ng-model="fotosProductoShow" />
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm="10">
+                                <md-button ng-click="browseFotos()" type="button">Seleccionar</md-button>
+                            </md-input-container>
+                            <md-input-container class="md-block" flex-gt-sm="10">
+                                <md-button ng-click="uploadFotos()" type="button">Subir</md-button>
+                            </md-input-container>
+                            <!-- <md-input-container class="md-block" flex-gt-sm>
+                                <md-button ng-click="browseFotos()" type="button">Seleccionar</md-button>
+                                <md-button ng-click="uploadFotos()" type="button">Subir</md-button>
+                            </md-input-container> -->
+                            <md-input-container class="md-block" flex-gt-sm style="display:none">
+                                <label>Fotos</label>
+                                <input type="file" id="fotosProducto" name="fotosProducto" accept=".gif,.jpg,.jpeg,.png"
+                                    ng-model="fotosProductox" onchange="angular.element(this).scope().updateFotosShow()"
+                                    multiple />
                             </md-input-container>
                         </div>
                         <div layout-gt-sm="row">
@@ -30,8 +50,8 @@
                             <md-input-container class="md-block" flex-gt-sm="15">
                                 <label>Unidad de Medida</label>
                                 <md-select ng-model="nuevoProducto.UM">
-                                    <md-option ng-repeat="unidad in unidades" value="{{unidad.UM}}">
-                                        {{unidad.descripcionUM}}
+                                    <md-option ng-repeat="unidad in unidades" value="{{unidad.unidadMedida}}">
+                                        {{unidad.umPlural}}
                                     </md-option>
                                 </md-select>
                             </md-input-container>
@@ -56,7 +76,8 @@
                             </md-input-container>
                             <md-input-container class="md-block" flex-gt-sm="10">
                                 <label>Cotizaci&oacute;n</label>
-                                <input name="cotizacionMoneda" disabled ng-model="nuevoProducto.cotizacionMoneda">
+                                <input name="cotizacionMoneda" disabled
+                                    ng-model="nuevoProducto.cotizacionMoneda | currency: '$ '">
                             </md-input-container>
                         </div>
                         <div layout-gt-sm="row">
@@ -85,13 +106,13 @@
                             <table flex-gt-sm>
                                 <thead>
                                     <tr layout-gt-sm="row">
-                                        <th flex-gt-sm="30"><label>Denominacion</label></th>
+                                        <th flex-gt-sm="25"><label>Denominacion</label></th>
                                         <th flex-gt-sm="10"><label>Cant.</label></th>
-                                        <th flex-gt-sm="10"><label>UM</label></th>
+                                        <th flex-gt-sm="5"><label>UM</label></th>
                                         <th flex-gt-sm="10"><label>Valor</label></th>
-                                        <th flex-gt-sm="20"><label>Tipo de Precio</label></th>
-                                        <th flex-gt-sm="10"><label>Moneda</label></th>
-                                        <th flex-gt-sm="10"><label>Precio Final</label></th>
+                                        <th flex-gt-sm="30"><label>Tipo de Precio</label></th>
+                                        <th flex-gt-sm="15"><label>Precio Final</label></th>
+                                        <th flex-gt-sm="5"><label>Redondeo</label></th>
                                     </tr>
                                 </thead>
                             </table>
@@ -99,7 +120,7 @@
                                 <table flex-gt-sm>
                                     <tbody>
                                         <tr layout-gt-sm="row" ng-repeat="presentacion in presentaciones">
-                                            <td flex-gt-sm="30">
+                                            <td flex-gt-sm="25">
                                                 <input class="md-table-input"
                                                     ng-bind="nuevoProducto.descripcion + presentacion.cantPresentacion"
                                                     required name="denominacionPresentacion"
@@ -109,7 +130,7 @@
                                                 <input class="md-table-input" required name="cantPresentacion"
                                                     ng-model="presentacion.cantPresentacion" type="number" step=".01">
                                             </td>
-                                            <td flex-gt-sm="10">
+                                            <td flex-gt-sm="5">
                                                 <input class="md-table-input" required name="UMPresentacion"
                                                     ng-model="nuevoProducto.UM" type="text" disabled>
                                             </td>
@@ -117,7 +138,7 @@
                                                 <input class="md-table-input" required name="valorPresentacion"
                                                     ng-model="presentacion.valor" type="number" step=".01">
                                             </td>
-                                            <td flex-gt-sm="20">
+                                            <td flex-gt-sm="30">
                                                 <select class="md-table-input" ng-model="presentacion.tipoPrecio">
                                                     <option
                                                         ng-repeat="tipoPrecio in tiposPrecio | filter: { claseTipoPrecio: 'P' }"
@@ -126,14 +147,37 @@
                                                     </option>
                                                 </select>
                                             </td>
-                                            <td flex-gt-sm="10">
-                                                <input class="md-table-input" required name="monedaPresentacion"
-                                                    ng-model="presentacion.moneda" type="text" disabled>
+                                            <td flex-gt-sm="15">
+                                                <input class="md-table-input" name="precioCalculadoPresentacion"
+                                                    disabled
+                                                    ng-bind="presentacion.precioFinal | currency: presentacion.moneda + '$ '">
                                             </td>
-                                            <td flex-gt-sm="10">
-                                                <input class="md-table-input" required
-                                                    name="precioCalculadoPresentacion"
-                                                    ng-model="presentacion.precioCalculado" type="number" disabled>
+                                            <td flex-gt-sm="5">
+                                                <md-button class="md-icon-button grilla-presentaciones-btn"
+                                                    type="button" ng-show="presentacion.redondeo === 0"
+                                                    ng-click="presentacion.redondeo = 5">
+                                                    <md-icon>close</md-icon>
+                                                </md-button>
+                                                <md-button class="md-icon-button md-accent grilla-presentaciones-btn"
+                                                    type="button" ng-show="presentacion.redondeo === 5"
+                                                    ng-click="presentacion.redondeo = 10">
+                                                    5
+                                                </md-button>
+                                                <md-button class="md-icon-button md-accent grilla-presentaciones-btn"
+                                                    type="button" ng-show="presentacion.redondeo === 10"
+                                                    ng-click="presentacion.redondeo = 50">
+                                                    10
+                                                </md-button>
+                                                <md-button class="md-icon-button md-accent grilla-presentaciones-btn"
+                                                    type="button" ng-show="presentacion.redondeo === 50"
+                                                    ng-click="presentacion.redondeo = 100">
+                                                    50
+                                                </md-button>
+                                                <md-button class="md-icon-button md-accent grilla-presentaciones-btn"
+                                                    type="button" ng-show="presentacion.redondeo === 100"
+                                                    ng-click="presentacion.redondeo = 0">
+                                                    100
+                                                </md-button>
                                             </td>
                                         </tr>
                                     </tbody>
