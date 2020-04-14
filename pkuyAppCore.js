@@ -45,7 +45,9 @@ var PkuyApp = {
   dbBackupNombre: 'PkuyDB_backup_', // Prefijo para BackUp de BD en drive
   httpRetriesDelay: 2500, // 2,5 seg
   httpRetriesAllowed: 48, // Max. 2 min
-
+  driveParentFolders: {
+    imagenesProductos: "169qYmK3noO6xXavMcqROjpt-_z678Wla"
+  },
 
   // Otros Params
   icon: "pkuy-icon-1x.png",
@@ -664,10 +666,14 @@ var PkuyApp = {
     for (let i = 0; i < cab.length; i++) {
       let field = cab[i];
 
-      if (obj[field] === undefined)
+      if (obj[field] === undefined) {
         recordValues.push(null);
-      else
-        recordValues.push(obj[field]);
+      } else {
+        if (typeof (obj[field]) === "object")
+          recordValues.push(JSON.stringify(obj[field]));
+        else
+          recordValues.push(obj[field]);
+      }
     }
 
     // Primer campo como ID
@@ -967,6 +973,80 @@ var PkuyApp = {
     PkuyApp.log('Precio ' + nuevoPrecio.tipoPrecio + ' para el producto ' + nuevoPrecio.prodID + ' registrado correctamente');
     return nuevoPrecio;
 
+  },
+
+  /**
+ * Insert new file.
+ *
+ * @param {File} fileData File object to read data from.
+ * @param {Function} callback Function to call when the request is complete.
+ */
+  insertFileToDrive: function (fileData, driveFileOptions, callback) {
+    const boundary = '-------358329793846319265415';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
+
+    var reader = new FileReader();
+    reader.readAsBinaryString(fileData);
+    reader.onload = function (e) {
+
+      var contentType = fileData.type || 'application/octet-stream';
+
+      var metadata = {
+        'mimeType': contentType,
+        'originalFilename': fileData.name,
+      };
+
+      // Copiar opciones de llamada
+      Object.assign(metadata, driveFileOptions);
+
+      // Último chequeo Title.
+      metadata.title = metadata.title || fileData.name;
+
+      var base64Data = btoa(reader.result);
+      var multipartRequestBody =
+        delimiter +
+        'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: ' + contentType + '\r\n' +
+        'Content-Transfer-Encoding: base64\r\n' +
+        '\r\n' +
+        base64Data +
+        close_delim;
+
+      var request = gapi.client.request({
+        'path': '/upload/drive/v2/files',
+        'method': 'POST',
+        'params': {
+          'uploadType': 'multipart',
+          'visibility': 'PRIVATE',
+          'convert': false,
+          'ocr': false
+        },
+        'headers': {
+          'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+        },
+        'body': multipartRequestBody
+      });
+
+      var jumpCallback = function (driveFile) {
+        console.log('DRIVE API CALL!!!!!');
+        console.log('Sent', multipartRequestBody);
+        console.log('Response', driveFile);
+        if (callback)
+          callback(driveFile)
+      };
+
+      request.execute(jumpCallback);
+    }
+  },
+
+  deleteFileFromDrive: function (fileId) {
+    var request = gapi.client.drive.files.delete({
+      'fileId': fileId
+    });
+    request.execute((resp) => { });
   },
 
   log: function (message) {

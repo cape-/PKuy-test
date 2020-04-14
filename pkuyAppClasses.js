@@ -196,6 +196,7 @@ class cl_producto extends PKuyObj_base {
   UM;
   peso;
   mlUrl;
+  files;
 
   constructor(dataIn) {
     super(dataIn);

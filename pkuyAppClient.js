@@ -1,10 +1,15 @@
-angular.module('PkuyApp', ['ngMaterial'])
+angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
 
   .config(function ($mdThemingProvider) {
     $mdThemingProvider.theme('default')
       .primaryPalette('pink')
       .accentPalette('yellow')
       .dark();
+
+    $mdThemingProvider.theme('altTheme')
+      .primaryPalette('orange')
+      .accentPalette('brown');
+    // .dark();
   })
 
   .factory('PkuyLink', function () {
@@ -16,10 +21,7 @@ angular.module('PkuyApp', ['ngMaterial'])
   /** MAIN CONTROLLER                                      */
   /**                                                      */
   /**----------------------------------------------------- */
-  .controller('main', function ($scope, $rootScope, $filter, $interval, $mdDialog, $http, PkuyLink) {
-
-    // Obtener Permiso para enviar Notifiaciones
-    Notification.requestPermission();
+  .controller('main', function ($scope, $rootScope, $filter, $mdDialog, $http, PkuyLink) {
 
     // Loading
     $rootScope.lo = () => $rootScope.pkuyLoading = true;
@@ -30,6 +32,7 @@ angular.module('PkuyApp', ['ngMaterial'])
     $scope.onDBLoaded = function () {
       // Actualizar Vista
       $rootScope.currentUser = PkuyLink.currentUser;
+      $rootScope.thisTerminalID = PkuyLink.thisTerminalID;
 
       // Backup en localStorage
       PkuyLink.log("Backup to localStorage");
@@ -69,56 +72,6 @@ angular.module('PkuyApp', ['ngMaterial'])
 
       $scope.$apply();
     }
-
-    // StartUp
-    $rootScope.lo();
-    PkuyLink.startPkuyDB($scope.onDBLoaded, $scope.onCotizacionesLoaded, $http);
-
-    // Menus
-    $scope.appMenu = [
-      {
-        titulo: '0.Sistema',
-        entradas: [
-          { titulo: 'Conectar con Google', do: function () { PkuyLink.handleAuthClick() } },
-          { titulo: 'Desconectar', do: function () { PkuyLink.handleSignoutClick() } },
-          { titulo: 'Reniciar PkuyApp', do: function () { PkuyLink.startPkuyDB() } }
-        ]
-      },
-      {
-        titulo: '1 . Consultas',
-        entradas: [
-          { titulo: 'Actualizar Contactos Google', do: function () { PkuyLink.cargarContactosGoogle(true) } },
-          { titulo: 'Importar Clientes desde Contactos Google', do: function ($event) { $scope.importarClientes($event) } },
-          {
-            titulo: 'Un submenu', subentradas: [
-              { titulo: 'Loading', do: function () { } },
-              { titulo: 'Stop Loading', do: function () { } },
-            ]
-          }
-        ]
-      },
-      {
-        titulo: '2 . Crear',
-        entradas: [
-          { titulo: 'Nuevo Cliente', do: function () { $scope.crearNuevoCliente() } },
-          { titulo: 'Nuevo Producto', do: function () { $scope.crearNuevoProducto() } },
-        ]
-      },
-      {
-        titulo: '3 . Ayuda',
-        entradas: [
-          { titulo: 'Reportar un Error', do: function () { $scope.reportarBug() } },
-        ]
-      },
-      {
-        titulo: 'X . Admin',
-        entradas: [
-          { titulo: 'Borrar localStorage', do: function () { localStorage.clear() } },
-          { titulo: 'Abrir PkuyDB', do: function () { window.open("https://docs.google.com/spreadsheets/d/" + PkuyLink.dbSpreadsheet) } },
-          { titulo: 'BackUp PkuyDB', do: function () { PkuyLink.backupPkuyDB() } }
-        ]
-      }
-    ];
 
     // TODO BORRAR
     $scope.reportarBug = function (ev) {
@@ -202,6 +155,73 @@ angular.module('PkuyApp', ['ngMaterial'])
 
     }
 
+    $scope.offlineScreen = function () {
+
+      $mdDialog.show({
+        clickOutsideToClose: false,
+        escapeToClose: false,
+        autoWrap: false,
+        parent: angular.element(document.body),
+        templateUrl: 'templates/offlineScreen.tmpl.html'
+      })
+    }
+
+    // Menus
+    $scope.appMenu = [
+      {
+        titulo: '0.Sistema',
+        entradas: [
+          { titulo: 'Conectar con Google', do: function () { PkuyLink.handleAuthClick() } },
+          { titulo: 'Desconectar', do: function () { PkuyLink.handleSignoutClick() } },
+          { titulo: 'Reniciar PkuyApp', do: function () { PkuyLink.startPkuyDB() } }
+        ]
+      },
+      {
+        titulo: '1 . Consultas',
+        entradas: [
+          { titulo: 'Actualizar Contactos Google', do: function () { PkuyLink.cargarContactosGoogle(true) } },
+          { titulo: 'Importar Clientes desde Contactos Google', do: function ($event) { $scope.importarClientes($event) } },
+          {
+            titulo: 'Un submenu', subentradas: [
+              { titulo: 'Loading', do: function () { } },
+              { titulo: 'Stop Loading', do: function () { } },
+            ]
+          }
+        ]
+      },
+      {
+        titulo: '2 . Crear',
+        entradas: [
+          { titulo: 'Nuevo Cliente', do: function () { $scope.crearNuevoCliente() } },
+          { titulo: 'Nuevo Producto', do: function () { $scope.crearNuevoProducto() } },
+        ]
+      },
+      {
+        titulo: '3 . Ayuda',
+        entradas: [
+          { titulo: 'Reportar un Error', do: function () { $scope.reportarBug() } },
+        ]
+      },
+      {
+        titulo: 'X . Admin',
+        entradas: [
+          { titulo: 'Borrar localStorage', do: function () { localStorage.clear() } },
+          { titulo: 'Abrir PkuyDB', do: function () { window.open("https://docs.google.com/spreadsheets/d/" + PkuyLink.dbSpreadsheet) } },
+          { titulo: 'BackUp PkuyDB', do: function () { PkuyLink.backupPkuyDB() } }
+        ]
+      }
+    ];
+
+    // Permiso para Notifiaciones
+    Notification.requestPermission();
+
+    // StartUp
+    if (navigator.onLine) {
+      $rootScope.lo();
+      PkuyLink.startPkuyDB($scope.onDBLoaded, $scope.onCotizacionesLoaded, $http);
+    } else {
+      $scope.offlineScreen();
+    }
   })
 
   /**----------------------------------------------------- */
@@ -378,7 +398,7 @@ angular.module('PkuyApp', ['ngMaterial'])
   /** Controlador del Diálogo para crear un Nuevo Producto */
   /**                                                      */
   /**----------------------------------------------------- */
-  .controller('dialogCrearNuevoProducto', function ($scope, PkuyLink, $rootScope, $mdDialog) {
+  .controller('dialogCrearNuevoProducto', function ($scope, PkuyLink, $timeout, $rootScope, $mdDialog) {
     /** Cerrar Diálogo */
     $scope.cancel = () => $mdDialog.cancel();
 
@@ -411,6 +431,16 @@ angular.module('PkuyApp', ['ngMaterial'])
     /** Clic en Crear */
     $scope.crearProducto = async function (nuevoProducto, presentaciones) {
 
+      // Convierte la FileList en un array
+      var filesArr = [];
+      for (i = 0, l = $scope.nuevoProducto.files.length; i < l; i++) {
+        var h = $scope.nuevoProducto.files[i];
+        filesArr.push({
+          "id": h.id,
+          "thumbnailLink": h.thumbnailLink,
+        });
+      }
+
       // Mapeo Obj.local a DB Obj (cl_producto)
       var productosNuevos = [new cl_producto(
         {
@@ -421,8 +451,8 @@ angular.module('PkuyApp', ['ngMaterial'])
           esModelo: true,
           cantPresentacion: 0,
           UM: nuevoProducto.UM,
-          mlUrl: ''
-
+          mlUrl: '',
+          files: filesArr
         }
       )];
 
@@ -510,58 +540,108 @@ angular.module('PkuyApp', ['ngMaterial'])
       document.getElementById('fotosProducto').click();
     }
 
-    $scope.updateFotosShow = function () {
-      console.log("updateFotosShow called");
+    $scope.updateFileList = function () {
 
+      // Archivos seleccionados
       var files = document.getElementById('fotosProducto').files;
 
+      // Salir si no hay archivos seleccionados
       if (!files.length)
         return;
-      else if (files.length === 1)
-        $scope.fotosProductoShow = "1 archivo seleccionado: ";
-      else
-        $scope.fotosProductoShow = "" + files.length + " archivos seleccionados: ";
 
-      for (let i = 0; i < files.length; i++) {
-        const f = files[i];
-        if (i)
-          $scope.fotosProductoShow += ", ";
-        $scope.fotosProductoShow += '"' + f.name + '"'
-      }
-      $scope.$apply();
+      // Mensaje y timeout para upload
+      $scope.status("" + files.length + " archivos seleccionados");
+      $timeout(() => { $scope.uploadFotos(files) }, 1000);
     }
 
     /** Subir fotos del producto */
-    $scope.imageBuffer = [];
-    $scope.uploadFotos = function () {
+    $scope.uploadFotos = function (files) {
 
       /** Escalar Imagen */
       /** https://stackoverflow.com/questions/23945494/use-html5-to-resize-an-image-before-upload */
-      
-      var files = document.getElementById('fotosProducto').files;
-      console.log(files);
+
+      if (!files)
+        var files = document.getElementById('fotosProducto').files;
 
       for (let i = 0; i < files.length; i++) {
-        const f = files[i];
+        const file = files[i];
+
+        if (file.id)   // Evitar duplicación de uploads
+          continue;
+
         var r = new FileReader();
 
         r.onloadend = function (e) {
-          var data = e.target.result;
-          $scope.imageBuffer.push(data);
-          console.debug(e);
+
           // DRIVE API Call
+          var driveFileOptions = {
+            'title': $scope.nuevoProducto.prodID
+              + $scope.nuevoProducto.descripcion
+              + '_' + $scope.nuevoProducto.origen, // Nombre Archivo
+            'parents': [
+              {
+                "id": PkuyLink.driveParentFolders.imagenesProductos,  // Folder para imágenes
+              }
+            ],
+          };
+          $scope.status("Subiendo [" + file.name + "]");
+          PkuyLink.insertFileToDrive(file, driveFileOptions, (drivefile) => {
+            if (drivefile.error) {
+              // Mostrar error
+              $scope.status("Error: " + drivefile.error.code + " " + drivefile.error.message);
+
+
+            } else {
+              // Registrar ID de drivefile
+              r.id = file.id = drivefile.id;
+              file.thumbnailLink = drivefile.thumbnailLink;
+              $scope.nuevoProducto.files.push(file);
+
+              // Status
+              $scope.status("Subido a GOOGLE DRIVE correctamente");
+
+              // Insertar Thumbs
+              var thumbFoto = document.createElement("img");
+              thumbFoto.src = drivefile.thumbnailLink;
+              var thumbDelete = document.createElement("i");
+              thumbDelete.classList.add("material-icons");
+              thumbDelete.innerText = 'delete';
+              thumbDelete.onclick = () => {
+                console.debug(this);
+                thumbDiv.remove();  // Remover HTML DOM element
+                $scope.nuevoProducto.files = $scope.nuevoProducto.files.filter((obj) => obj.id !== file.id); // Remover el item por ID
+
+                PkuyLink.deleteFileFromDrive(file.id); // TODO: Eliminar file del drive
+              };
+              var thumbDiv = document.createElement("div");
+              thumbDiv.id = file.id;
+              thumbDiv.classList.add("thumbFoto");
+              thumbDiv.appendChild(thumbDelete);
+              thumbDiv.appendChild(thumbFoto);
+              document.getElementById("divMiniaturas").appendChild(thumbDiv);
+            }
+          });
 
         }
 
-        r.readAsBinaryString(f);
+        r.readAsBinaryString(file);
 
       }
-    }
+    };
+
+    $scope.status = function (s = "") {
+      $scope.statusStr = s;
+      $scope.$apply();
+    };
+
     /** Calcular Precio de cada Presentación */
     $scope.calcularPreciosPresentaciones = function () {
+      console.log("calcularPreciosPresentaciones called");
+
       for (let i = 0; i < $scope.presentaciones.length; i++) {
 
         presentacion = $scope.presentaciones[i];
+        console.log(presentacion);
 
         var selectedTipoPrecio = $scope.tiposPrecio
           .find(tiposPrecio => tiposPrecio.tipoPrecio == presentacion.tipoPrecio);
@@ -684,7 +764,8 @@ angular.module('PkuyApp', ['ngMaterial'])
       'tipoPrecio': '',
       'precioReferenciaUM': 1.00,
       'moneda': '',
-      'cotizacionMoneda': 1.00
+      'cotizacionMoneda': 1.00,
+      'files': []
     };
 
     $scope.nuevaPresentacion = {

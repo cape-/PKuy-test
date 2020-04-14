@@ -1,11 +1,7 @@
 /keys/pkuyApp_keys.js
 /keys/mongodbAtlasKeys.txt
 /keys/gapi_sheets_responses_examples.json
-covid.html
-covid.js
 dolar_apis.txt
-matrix.js
-matrix.xlsx
 libs/chartjs/chart.js
 libs/webdatarocks/index.html
 libs/webdatarocks/webdatarocks.css
@@ -33,4 +29,3 @@ libs/webdatarocks/theme/orange/webdatarocks.min.css
 libs/webdatarocks/theme/teal/webdatarocks.css
 libs/webdatarocks/theme/teal/webdatarocks.less
 libs/webdatarocks/theme/teal/webdatarocks.min.css
-pais.tmpl.html

@@ -14,31 +14,32 @@
             <md-content layout-padding>
                 <div>
                     <form ng-cloak name="crearNuevoProducto" ng-submit="crearProducto(nuevoProducto, presentaciones)">
-                        <h4>Datos del Producto</h4>
+
+                        <div layout-gt-sm="row" id="rowCabecera">
+                            <h2 flex="55">Datos del Producto</h2>
+                            <!-- <md-chips flex="45" ng-model="filesArr" class="md-chips-mini md-chips-files" readonly="true"
+                                md-removable="false">
+                            </md-chips> -->
+                            <div id="divMiniaturas" flex="" layout-gt-sm="row"></div>
+                        </div>
+
                         <div layout-gt-sm="row">
                             <md-input-container class="md-block" flex-gt-sm="55">
                                 <label>Descripción</label>
                                 <input required name="descripcion" ng-model="nuevoProducto.descripcion" type="text">
                             </md-input-container>
-                            <md-input-container class="md-block" flex-gt-sm>
-                                <label>Fotos</label>
-                                <input type="text" id="fotosProductoShow" name="fotosProductoShow"
-                                    ng-model="fotosProductoShow" />
+                            <md-input-container class="md-block" flex-gt-sm="">
+                                <label>URL Mercadolibre</label>
+                                <input required name="descripcion" ng-model="nuevoProducto.mlUrl"
+                                    ng-init='nuevoProducto.mlUrl="https://articulo.mercadolibre.com.ar/"' type="text">
                             </md-input-container>
-                            <md-input-container class="md-block" flex-gt-sm="10">
-                                <md-button ng-click="browseFotos()" type="button">Seleccionar</md-button>
+                            <md-input-container class="md-block" flex-gt-sm="15">
+                                <md-button ng-click="browseFotos()" class="fotosBrowseBtn md-primary md-raised" type="button">Seleccionar Fotos</md-button>
                             </md-input-container>
-                            <md-input-container class="md-block" flex-gt-sm="10">
-                                <md-button ng-click="uploadFotos()" type="button">Subir</md-button>
-                            </md-input-container>
-                            <!-- <md-input-container class="md-block" flex-gt-sm>
-                                <md-button ng-click="browseFotos()" type="button">Seleccionar</md-button>
-                                <md-button ng-click="uploadFotos()" type="button">Subir</md-button>
-                            </md-input-container> -->
                             <md-input-container class="md-block" flex-gt-sm style="display:none">
                                 <label>Fotos</label>
                                 <input type="file" id="fotosProducto" name="fotosProducto" accept=".gif,.jpg,.jpeg,.png"
-                                    ng-model="fotosProductox" onchange="angular.element(this).scope().updateFotosShow()"
+                                    ng-model="fotosProducto" onchange="angular.element(this).scope().updateFileList()"
                                     multiple />
                             </md-input-container>
                         </div>
@@ -76,8 +77,8 @@
                             </md-input-container>
                             <md-input-container class="md-block" flex-gt-sm="10">
                                 <label>Cotizaci&oacute;n</label>
-                                <input name="cotizacionMoneda" disabled
-                                    ng-model="nuevoProducto.cotizacionMoneda | currency: '$ '">
+                                <input name="cotizacionMoneda" type="text" disabled
+                                    value="{{ nuevoProducto.cotizacionMoneda | currency: '$ ' }}">
                             </md-input-container>
                         </div>
                         <div layout-gt-sm="row">
@@ -121,9 +122,7 @@
                                     <tbody>
                                         <tr layout-gt-sm="row" ng-repeat="presentacion in presentaciones">
                                             <td flex-gt-sm="25">
-                                                <input class="md-table-input"
-                                                    ng-bind="nuevoProducto.descripcion + presentacion.cantPresentacion"
-                                                    required name="denominacionPresentacion"
+                                                <input class="md-table-input" required name="denominacionPresentacion"
                                                     ng-model="presentacion.denominacion" type="text">
                                             </td>
                                             <td flex-gt-sm="10">
@@ -150,7 +149,7 @@
                                             <td flex-gt-sm="15">
                                                 <input class="md-table-input" name="precioCalculadoPresentacion"
                                                     disabled
-                                                    ng-bind="presentacion.precioFinal | currency: presentacion.moneda + '$ '">
+                                                    value="{{ presentacion.precioFinal | currency: presentacion.moneda + '$ ' }}">
                                             </td>
                                             <td flex-gt-sm="5">
                                                 <md-button class="md-icon-button grilla-presentaciones-btn"
@@ -186,7 +185,7 @@
                         </div>
                         <md-dialog-actions layout="row">
                             <md-button class="md-accent md-disabled" ng-if="validaciones !== ''">
-                                {{ validaciones }}
+                                {{ statusStr }}
                             </md-button>
                             <span flex></span>
                             <md-button class="md-raised md-accent" type="submit">

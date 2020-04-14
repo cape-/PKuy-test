@@ -1,0 +1,33 @@
+<md-dialog>
+    <div layout="column" ng-cloak>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>
+                    Offline!
+                </h2>
+            </div>
+        </md-toolbar>
+
+        <md-dialog-content>
+            <md-content layout="row" layout-padding="">
+                <div>
+                    <p>
+                        <i class="material-icons icon-big">signal_wifi_off</i>
+                    </p>
+                </div>
+                <div>
+                    <p><strong>Parece que no hay una conexión a Internet disponible!</strong></p>
+                    <p>PkuyApp necesita conectarse a servidores remotos.
+                        <br>Por favor, volvé a cargar PkuyApp cuando dispongas de una conexión a Internet.</p>
+                </div>
+            </md-content>
+            <md-dialog-actions layout="row">
+                <span flex></span>
+                <md-button class="md-raised" type="button" onclick="window.location.reload()">
+                    Recargar PkuyApp
+                </md-button>
+                <span flex></span>
+            </md-dialog-actions>
+        </md-dialog-content>
+    </div>
+</md-dialog

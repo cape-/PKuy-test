@@ -10,8 +10,8 @@
     <!-- Angular Material style sheet -->
     <link rel="stylesheet" href="/libs/angular_material/1.1.12/angular-material.min.css">
     <link rel="stylesheet" href="/resources/fonts/material-icons/material-icons.css">
-    <link rel="stylesheet" href="/resources/fonts/Roboto/roboto.css">
-    <link rel="stylesheet" href="/resources/fonts/Inter/inter.css">
+    <!-- <link rel="stylesheet" href="/resources/fonts/Roboto/roboto.css">
+    <link rel="stylesheet" href="/resources/fonts/Inter/inter.css"> -->
     <link rel="stylesheet" href="/resources/fonts/baloo-2/baloo-2.css">
     <link rel="stylesheet" href="/resources/css/cliente.css">
     <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic"> -->
@@ -75,7 +75,7 @@
         <md-content layout="column" layout-align="start center" layout-padding>
             <div class="widgetRow" flex="25" layout="row">
                 <!-- WIDGET -->
-                <div class="principalWidget colapsableWidget" ng-show="dolar">
+                <div class="funky-show-hide principalWidget colapsableWidget" ng-show="dolar.blue.venta">
                     <h2 class="fixedColapsableWidget">
                         <i class="material-icons">monetization_on</i>
                         <strong>Oficial </strong>{{ (dolar.oficial.venta | currency:'$') }}
@@ -89,7 +89,7 @@
                     <h4>Blue Venta: {{ (dolar.blue.venta | currency:'$') }}</h4>
                 </div>
                 <!-- WIDGET -->
-                <div class="principalWidget colapsableWidget" ng-show="currentUser">
+                <div class="funky-show-hide principalWidget colapsableWidget" ng-show="currentUser">
                     <h2 class="fixedColapsableWidget">
                         <i class="material-icons">account_circle</i>
                         {{ currentUser.nombreCompleto }}
@@ -97,7 +97,7 @@
                         <span>Log-in {{ currentUser.email }}</span>
                     </h2>
                     <h4>ID@terminal</h4>
-                    <h4>{{ currentUser.id }}@{{ thisTerminalID}}</h4>
+                    <h4>{{ currentUser.id }}@{{ thisTerminalID }}</h4>
                 </div>
                 <div flex=""></div>
             </div>
