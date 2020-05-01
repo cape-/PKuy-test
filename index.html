@@ -76,12 +76,14 @@
             <div class="widgetRow" flex="25" layout="row">
                 <!-- WIDGET -->
                 <div class="funky-show-hide principalWidget colapsableWidget" ng-show="dolar.blue.venta">
-                    <h2 class="fixedColapsableWidget">
-                        <i class="material-icons">monetization_on</i>
-                        <strong>Oficial </strong>{{ (dolar.oficial.venta | currency:'$') }}
-                        <strong> Blue </strong>{{ (dolar.blue.venta | currency:'$')  }}
-                        <br>
-                        <span>{{ dolarActualizadoTxt }}</span>
+                    <h2 class="fixedColapsableWidget" layout="column">
+                        <i flex="0" class="material-icons">monetization_on</i>
+                        <div>
+                            <strong>Oficial </strong>{{ (dolar.oficial.venta | currency:'$') }}
+                            <strong> Blue </strong>{{ (dolar.blue.venta | currency:'$')  }}
+                            <br>
+                            <span>{{ dolarActualizadoTxt }}</span>
+                        </div>
                     </h2>
                     <h4>Oficial Compra: {{ (dolar.oficial.compra | currency:'$') }}</h4>
                     <h4>Oficial Venta: {{ (dolar.oficial.venta | currency:'$') }}</h4>
@@ -90,11 +92,13 @@
                 </div>
                 <!-- WIDGET -->
                 <div class="funky-show-hide principalWidget colapsableWidget" ng-show="currentUser">
-                    <h2 class="fixedColapsableWidget">
-                        <i class="material-icons">account_circle</i>
-                        {{ currentUser.nombreCompleto }}
-                        <br>
-                        <span>Log-in {{ currentUser.email }}</span>
+                    <h2 class="fixedColapsableWidget" layout="column">
+                        <i flex="0" class="material-icons">account_circle</i>
+                        <div>
+                            {{ currentUser.nombreCompleto }}
+                            <br>
+                            <span>Log-in {{ currentUser.email }}</span>
+                        </div>
                     </h2>
                     <h4>ID@terminal</h4>
                     <h4>{{ currentUser.id }}@{{ thisTerminalID }}</h4>

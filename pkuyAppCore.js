@@ -171,13 +171,7 @@ var PkuyApp = {
 
     var initProm = new Promise(function (resolve, reject) {
       gapi.client.init(PkuyApp.gapiClientParams)
-        .then(
-          function () {
-            resolve();
-          },
-          function (error) {
-            reject(error);
-          })
+        .then(resolve,reject);
     });
 
     initProm.catch((error) => PkuyApp.error('Error en gapi.client.init! ' + JSON.stringify(error, null, 2)))

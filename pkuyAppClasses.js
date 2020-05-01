@@ -3,7 +3,14 @@ class PKuyObj_base {
   TS;
   usuario;
   borrado;
-  constructor() {
+  constructor(dataIn) {
+    var attrib;
+    for (attrib in dataIn) {
+      if (dataIn[attrib] === 'TRUE')
+        dataIn[attrib] = true;
+      else if (dataIn[attrib] === 'FALSE')
+        dataIn[attrib] = false;
+    }
   }
   direccion() {
     return PkuyApp.db.maestroDirecciones.getByID(this.dirID);
@@ -67,7 +74,6 @@ class cl_pedido extends PKuyObj_base {
   ptoDespachoID;
   nombrePtoDespacho;
   implicaMovimiento;
-  borrado;
   pagado;
   cbtePago;
   preparado;
@@ -442,7 +448,7 @@ class cl_maestro_base {
 
   constructor() {
   }
-  
+
   /** Devuelve todos los elementos */
   getAll() {
     return this.recordSet;
@@ -455,9 +461,10 @@ class cl_maestro_base {
   }
 
   /** Verificar Objeto: completitud de Clave */
-  verify(obj) {
-    for (let i = 0; i < obj.keys().length; i++) {
-      const field = obj.keys()[i];
+  verifyKey(obj) {
+    var keyFields = obj.keys() || [];
+    for (let i = 0; i < keyFields.length; i++) {
+      const field = keyFields[i];
       if (!field)
         throw new Error(".add: faltan campos clave");
     }
@@ -465,11 +472,10 @@ class cl_maestro_base {
 
   /** Verificar y Agregar */
   add(obj) {
-    this.verify(obj);
+    this.verifyKey(obj);
+    // TODO Verificar Unicidad Key
     this.recordSet.push(obj);
   }
-
-
 }
 
 /* CLASE MAESTRO DE CLIENTES */
@@ -489,17 +495,17 @@ class cl_maestroClientes extends cl_maestro_base {
   //     throw "Error: Cliente: falta cliID";
   //   this.recordSet.push(cliente);
   // }
-
+  getAll() {
+    return this.recordSet.filter((p) => !p.borrado);
+  }
   getModelos() {
-    return this.recordSet.filter(cliente => cliente.esModelo);
+    return this.getAll().filter((cliente) => cliente.esModelo);
   }
-
   getClientes() {
-    return this.recordSet.filter(cliente => !cliente.esModelo);
+    return this.getAll().filter((cliente) => !cliente.esModelo);
   }
-
   getByApellido(queryApellido) {
-    return this.recordSet.find((cliente) => cliente.apellido.toLowerCase() == queryApellido.toLowerCase());
+    return this.getAll().find((cliente) => cliente.apellido.toLowerCase() == queryApellido.toLowerCase());
   }
 }
 
@@ -514,14 +520,17 @@ class cl_maestroPedidos extends cl_maestro_base {
       this.add(new cl_pedido(tableData[pedido_data]));
     }
   }
+  getAll() {
+    return this.recordSet.filter((p) => !p.borrado);
+  }
   getByID(queryOrdID) {
-    return this.recordSet.filter((pedido) => pedido.ordID == queryOrdID);
+    return this.getAll().filter((pedido) => pedido.ordID === queryOrdID);
   }
   getByCliID(queryCliID) {
-    return this.recordSet.filter((pedido) => pedido.cliID == queryCliID);
+    return this.getAll().filter((pedido) => pedido.cliID === queryCliID);
   }
   getByProdID(queryProdID) {
-    return this.recordSet.filter((pedido) => pedido.prodID == queryProdID);
+    return this.getAll().filter((pedido) => pedido.prodID === queryProdID);
   }
 }
 
@@ -601,7 +610,30 @@ class cl_maestroProductos extends cl_maestro_base {
       this.add(new cl_producto(tableData[producto_data]));
     }
   }
+  getAll() {
+    return this.recordSet.filter((p) => !p.borrado);
+  }
   getByProdID(prodID) {
+    return this.getAll().find((p) => p.prodID === prodID);
+  }
+  getProdsModelo() {
+    return this.getAll().filter((p) => p.esModelo);
+  }
+  getProdsPorOrigen(origen) {
+    return this.getAll().filter((p) => p.origen === origen);
+  }
+  getOrigenesProductos() {
+    return this.getAll().reduce(function (accum, curr, i, arr) {
+      if (i === 1)
+        accum = (accum.origen) ? [accum.origen] : [];
+      if (curr.origen && (accum.findIndex((o) => o === curr.origen) === -1))
+        accum.push(curr.origen);
+
+      return accum;
+    });
+  }
+  getPresentacionesProd(prodID = '0') {
+    return this.getAll().filter((p) => p.prodID_modelo === prodID);
   }
 }
 
@@ -682,7 +714,7 @@ class cl_maestroDirecciones extends cl_maestro_base {
     }
   }
   getByID(queryDirID) {
-    return this.recordSet.find(direccion => direccion.dirID == queryDirID);
+    return this.getAll().find(direccion => direccion.dirID === queryDirID);
   }
   // add(direccion) {
   //   if ((direccion.dirID === undefined) || (direccion.dirID === ''))

@@ -155,6 +155,23 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
 
     }
 
+    /** Abrir Diálogo para Listado de Producto */
+    $scope.listarProductos = async function (ev) {
+      $mdDialog.show({
+        controller: 'dialogListarProductos',
+        templateUrl: '/templates/listadoProductos.tmpl.html',
+        parent: angular.element(document.body),
+        targetEvent: ev,
+        clickOutsideToClose: true,
+        fullscreen: false
+      })
+        .then(function (answer) {
+        })
+        .catch(function () {
+        });
+
+    }
+
     $scope.offlineScreen = function () {
 
       $mdDialog.show({
@@ -169,7 +186,7 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
     // Menus
     $scope.appMenu = [
       {
-        titulo: '0.Sistema',
+        titulo: '0 . Sistema',
         entradas: [
           { titulo: 'Conectar con Google', do: function () { PkuyLink.handleAuthClick() } },
           { titulo: 'Desconectar', do: function () { PkuyLink.handleSignoutClick() } },
@@ -181,10 +198,11 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
         entradas: [
           { titulo: 'Actualizar Contactos Google', do: function () { PkuyLink.cargarContactosGoogle(true) } },
           { titulo: 'Importar Clientes desde Contactos Google', do: function ($event) { $scope.importarClientes($event) } },
+          { titulo: 'Reporte Productos', do: function ($event) { $scope.listarProductos($event) } },
           {
-            titulo: 'Un submenu', subentradas: [
-              { titulo: 'Loading', do: function () { } },
-              { titulo: 'Stop Loading', do: function () { } },
+            titulo: 'Listados', subentradas: [
+              { titulo: '.....?', do: function () { } },
+              { titulo: '...?', do: function () { } },
             ]
           }
         ]
@@ -192,8 +210,8 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
       {
         titulo: '2 . Crear',
         entradas: [
-          { titulo: 'Nuevo Cliente', do: function () { $scope.crearNuevoCliente() } },
-          { titulo: 'Nuevo Producto', do: function () { $scope.crearNuevoProducto() } },
+          { titulo: 'Nuevo Cliente', do: function ($event) { $scope.crearNuevoCliente($event) } },
+          { titulo: 'Nuevo Producto', do: function ($event) { $scope.crearNuevoProducto($event) } },
         ]
       },
       {
@@ -212,8 +230,9 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
       }
     ];
 
-    // Permiso para Notifiaciones
-    Notification.requestPermission();
+    // TODO: Activar notificaciones.
+    // // Permiso para Notifiaciones
+    // Notification.requestPermission();
 
     // StartUp
     if (navigator.onLine) {
@@ -305,6 +324,10 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
     $scope.maestroPtosDespacho = PkuyLink.db.maestroPtosDespacho.getAll();
     $scope.maestroMediosPago = PkuyLink.db.maestroMediosPago.getAll();
     $scope.descuentos = PkuyLink.descuentos;
+
+    // TODO: Convertir a tabla de Sheet grcli_01
+    // $scope.gruposClientes = PkuyLink.db.gruposClientes.getAll();
+
     $scope.gruposClientes = [
       {
         "grCliID": "ML",
@@ -327,6 +350,8 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
     $scope.crearCliente = async function (nuevoCli, nuevaDir) {
       $rootScope.lo();
       var clienteCreado = await PkuyLink.nuevoCliente(nuevoCli, nuevaDir);
+      // TODO: Validaciones del Cliente creado ?
+      // if ...
       $rootScope.slo();
       $mdDialog.hide();
 
@@ -339,13 +364,8 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
         controller: function ($scope, $mdDialog, PkuyLink) {
           $scope.titulo = "Cargar Modelo";
           $scope.modelos = PkuyLink.db.maestroClientes.getModelos();
-          $scope.cancel = function () {
-            $mdDialog.cancel();
-          };
-          $scope.usarModelo = function (index) {
-            $mdDialog.hide($scope.modelos[index]);
-          };
-
+          $scope.cancel = () => { $mdDialog.cancel() };
+          $scope.usarModelo = (index) => { $mdDialog.hide($scope.modelos[index]) };
         },
         preserveScope: true,
         autoWrap: true,
@@ -363,19 +383,13 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
 
     /** Clic en Guardar Modelo */
     $scope.guardarModelo = function () {
-      console.log("GUARDAR MODELO");
-
       $mdDialog.show({
         controllerAs: 'dialogCtrl',
         controller: function ($scope, $mdDialog, PkuyLink) {
           $scope.titulo = "Guardar Modelo";
           $scope.nombreModelo = "";
-          $scope.cancel = function () {
-            $mdDialog.cancel();
-          };
-          $scope.guardar = function () {
-            $mdDialog.hide($scope.nombreModelo);
-          };
+          $scope.cancel = () => { $mdDialog.cancel() };
+          $scope.guardar = () => { $mdDialog.hide($scope.nombreModelo) };
         },
         preserveScope: true,
         autoWrap: true,
@@ -385,6 +399,8 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
         $scope.nuevoCliente.esModelo = nombreModelo;
         $rootScope.lo();
         var clienteModelo = await PkuyLink.nuevoCliente($scope.nuevoCliente, $scope.nuevaDireccion);
+        // TODO: Validaciones del cliente creado ?
+        // if ...
         $rootScope.slo();
         $scope.nuevoCliente = new cl_cliente();
         $scope.nuevaDireccion = new cl_direccion();
@@ -405,8 +421,7 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
     $scope.agregarPresentacion = function () {
       let i = $scope.presentaciones.push(Object.assign({}, $scope.nuevaPresentacion));
 
-      $scope.presentaciones[--i].denominacion =
-        $scope.nuevoProducto.descripcion
+      $scope.presentaciones[--i].denominacion = $scope.nuevoProducto.descripcion
         + ' x' + $scope.presentaciones[i].cantPresentacion
         + ' ' + $scope.nuevoProducto.UM;
 
@@ -431,15 +446,18 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
     /** Clic en Crear */
     $scope.crearProducto = async function (nuevoProducto, presentaciones) {
 
+      // TODO: Verificar si no hay proceso activo de upload de fotos
+
       // Convierte la FileList en un array
-      var filesArr = [];
-      for (i = 0, l = $scope.nuevoProducto.files.length; i < l; i++) {
-        var h = $scope.nuevoProducto.files[i];
-        filesArr.push({
-          "id": h.id,
-          "thumbnailLink": h.thumbnailLink,
-        });
-      }
+      var filesArr = $scope.nuevoProducto.files.map((f) => { return { "id": f.id, "thumbnailLink": f.thumbnailLink } });
+      // var filesArr = [];
+      // for (i = 0, l = $scope.nuevoProducto.files.length; i < l; i++) {
+      //   var h = $scope.nuevoProducto.files[i];
+      //   filesArr.push({
+      //     "id": h.id,
+      //     "thumbnailLink": h.thumbnailLink,
+      //   });
+      // }
 
       // Mapeo Obj.local a DB Obj (cl_producto)
       var productosNuevos = [new cl_producto(
@@ -498,10 +516,10 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
 
       });
 
-      console.debug(nuevoProducto);
-      console.debug(presentaciones);
-      console.debug(productosNuevos);
-      console.debug(preciosNuevos);
+      // console.debug(nuevoProducto);
+      // console.debug(presentaciones);
+      // console.debug(productosNuevos);
+      // console.debug(preciosNuevos);
 
       $rootScope.lo();
 
@@ -785,3 +803,84 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
     //$scope.agregarPresentacion();
 
   })
+  .controller('dialogListarProductos', function ($scope, PkuyLink, $timeout, $rootScope, $mdDialog) {
+    /** Cerrar Diálogo */
+    $scope.cancel = () => $mdDialog.cancel();
+
+    $scope.togglePresentaciones = function (prod, index) {
+      if (!prod.esModelo)
+        return;
+      if (prod.expanded) {
+        // Si está expandido -> colapsar
+        while ($scope.productos[index + 1].prodID_modelo === prod.prodID) {
+          $scope.productos.splice((index + 1), 1);
+        }
+      } else {
+        // Si está colapsado -> expandir
+        var presentaciones = PkuyLink.db.maestroProductos.getPresentacionesProd(prod.prodID);
+        $scope.productos.splice((index + 1), 0, ...presentaciones);
+      }
+      prod.expanded = !prod.expanded;
+    };
+
+
+
+    $scope.titulo = "Todos los Productos"
+    // TS: "1/1/2019 9:00:00"
+    // UM: "kg"
+    // borrado: undefined
+    // cantPresentacion: "2"
+    // descripcion: "Palo Santo x 2kg"
+    // esModelo: ""
+    // files: ""
+    // keys: function keys()
+    // mlUrl: "https://articulo.mercadolibre.com.ar/MLA-780505423-palo-santo-premium-x-500gs"
+    // origen: ""
+    // peso: "2"
+    // prodID: "102000"
+    // prodID_modelo: "100000"
+    // rowRange: "prod_01!A6:ZZ6"
+    // usuario: "maurooris"
+    $scope.columnas = [
+      { title: "Producto", id: "descripcion", flex: "" },
+      { title: "Orígen", id: "origen", flex: "" },
+      { title: "Unidad", id: "UM", flex: "" },
+    ];
+    $scope.columnasPres = [
+      { title: "Presentación", id: "descripcion", flex: "" },
+      { title: "Cant.", id: "cantPresentacion", flex: "10" },
+      { title: "Unidad", id: "UM", flex: "10" },
+    ];
+    $scope.accionesPres = [
+      { icon: "link", do: (prodID) => { console.log("link (" + prodID + ")") } },
+      { icon: "edit", do: (prodID) => { console.log("edit (" + prodID + ")") } },
+      { icon: "attach_money", do: (prodID) => { console.log("attach_money (" + prodID + ")") } },
+      { icon: "delete", do: (prodID) => { console.log("delete (" + prodID + ")") } },
+      { icon: "poll", do: (prodID) => { console.log("poll (" + prodID + ")") } },
+      { icon: "share", do: (prodID) => { console.log("share (" + prodID + ")") } },
+    ];
+
+    $scope.productos = PkuyLink.db.maestroProductos.getProdsModelo();
+
+
+    async function updateProdTags(i = 0) {
+      if (i >= $scope.productos.length)
+        return;
+      var prod = $scope.productos[i];
+      prod.star = Math.random() >= 0.8;
+      prod.hot = Math.random() >= 0.7;
+      prod.new = Math.random() >= 0.8;
+      prod.pause = Math.random() >= 0.9;
+      prod.trending = (Math.random() * 4) - 2;
+
+      // console.log(i, prod);
+
+      // await $timeout(()=>{}, (Math.random() * 1000));
+      updateProdTags(++i);
+    };
+
+    updateProdTags();
+
+  })
+
+// TODO: Reporte de ventas con iconos new_release(nuevo) spa(creciendo) whatshot(on fire) ac_unit(frio) cake(aniversario 1000 ventas)

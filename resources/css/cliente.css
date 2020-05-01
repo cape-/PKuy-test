@@ -25,10 +25,41 @@ form {
   right: 30px;
 }
 
-i.material-icons.icon-big {
+.material-icons.icon-big {
   font-size: 48px;
 }
 
+.material-icons.icon-orange {
+  color: rgb(255,235,59);;
+}
+.material-icons.icon-red {
+  color: red;
+}
+.material-icons.icon-yellow {
+  color: yellow;
+}
+.material-icons.icon-lime {
+  color: lime;
+}
+.material-icons.icon-crimson {
+  color: crimson;
+}
+.material-icons.icon-darkcyan {
+  color: darkcyan;
+}
+.material-icons.icon-red-inverse {
+  background-color: red;
+  color: white;
+  border-radius: 1px;
+}
+.md-button.md-icon-button-compact {
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: -6px;
+}
+.md-button.md-icon-button-compact md-icon {
+  font-size: large;
+}
 h2.cabecera-app {
   font-size: 48px;
 }
@@ -56,8 +87,37 @@ md-icon.cliente-icon {
   text-align: right;
 }
 
-/* TODO: BORRAR */
+tr.listadoProd {
+  cursor: pointer;
+  max-height: 32px;
+  line-height: 32px;
+}
 
+tr.listadoProd > .prodModelo {
+  background: #222;
+  font-style: normal;
+  font-size: normal;
+}
+tr.listadoProd:hover > .prodModelo {
+  background: #1a1a1a;
+}
+
+tr.listadoProd > .presentacion {
+  background: #444;
+  max-height: 24px;
+  line-height: 24px;
+  font-style: italic;
+  font-size: small;
+}
+tr.listadoProd:hover > .presentacion {
+  background: #3a3a3a;
+}
+
+td.prodTags{
+  text-align: right;
+}
+
+/* TODO: BORRAR */
 /***********************************************************/
 .funky-show-hide.ng-hide-add {
   transform: rotateZ(0);
@@ -123,10 +183,17 @@ h2.fixedColapsableWidget span {
   line-height: 4px;
   color: #aaa;
 }
-h2.fixedColapsableWidget i.material-icons {
+h2.fixedColapsableWidget .material-icons {
   position: relative;
   top: 9px;
+  max-height: 0;
+  text-align: left;
+  overflow: visible;
   padding-right: 8px;
+}
+
+h2.fixedColapsableWidget div {
+  margin-left: 30px;
 }
 
 md-chips.md-chips-files {
@@ -213,7 +280,7 @@ div.thumbFoto img {
   max-height: 60px;
   margin-top: -5px;
 }
-div.thumbFoto i.material-icons {
+div.thumbFoto .material-icons {
   position: relative;
   width: 100%;
   margin-bottom: -1em;

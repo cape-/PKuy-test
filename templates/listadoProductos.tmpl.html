@@ -1,0 +1,109 @@
+<md-dialog flex="80">
+    <div layout="column" style="max-height: 600px;" ng-cloak>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>{{ titulo }}</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon aria-label="Close dialog">close</md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+
+        <md-dialog-content>
+            <md-content layout-padding>
+                <div>
+                    <table>
+                        <thead>
+                            <tr layout="row" class="listadoProd">
+                                <th flex="5"></th>
+                                <th ng-repeat="col in columnas" flex="{{ col.flex }}">{{ col.title }}</th>
+                                <!-- <th>MercadoLibre</th> -->
+                            </tr>
+                            <tr layout="row" class="listadoProd">
+                                <th flex="5" class="presentacion"></th>
+                                <th ng-repeat="colPres in columnasPres" class="presentacion" flex="{{ colPres.flex }}">{{ colPres.title }}</th>
+                                <th class="presentacion" colspan="{{ accionesPres.length }}">Acciones</th class="presentacion" >
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="prod in productos" class="listadoProd" ng-init="prod.expanded = false" ng-click="togglePresentaciones(prod,$index)">
+                                <!-- MODELO -->
+                                <!-- [+] / [-] -->
+                                <td ng-if="prod.esModelo && prod.expanded" class="prodModelo" flex="5"><md-icon>expand_more</md-icon></td>
+                                <td ng-if="prod.esModelo && !prod.expanded" class="prodModelo" flex="5"><md-icon class="icon-orange">chevron_right</md-icon></td>
+                                <td ng-if="prod.esModelo" class="prodModelo prodTags" flex="10">
+                                    <md-icon ng-if="prod.star" class="icon-yellow">star</md-icon>
+                                    <md-icon ng-if="prod.hot" class="icon-red">whatshot</md-icon>
+                                    <md-icon ng-if="prod.new" class="icon-lime">fiber_new</md-icon>
+                                    <md-icon ng-if="prod.pause" class="icon-red-inverse">pause</md-icon>
+                                    <md-icon ng-if="prod.trending >= 1" class="icon-crimson">trending_up</md-icon>
+                                    <md-icon ng-if="prod.trending > -1 && prod.trending < 1">trending_flat</md-icon>
+                                    <md-icon ng-if="prod.trending <= -1" class="icon-darkcyan">trending_down</md-icon>
+                                </td>
+                                <!-- Columnas -->
+                                <td ng-if="prod.esModelo" class="prodModelo" ng-repeat="col in columnas" flex="{{ col.flex }}">{{ prod[col.id] }}</td>
+                                
+                                <!-- PRESENTACION -->
+                                <!-- > -->
+                                <td ng-if="!prod.esModelo" class="presentacion prodTags" flex="10">
+                                    <md-icon ng-if="prod.star" class="icon-yellow">star</md-icon>
+                                    <md-icon ng-if="prod.hot" class="icon-red">whatshot</md-icon>
+                                    <md-icon ng-if="prod.new" class="icon-lime">fiber_new</md-icon>
+                                    <md-icon ng-if="prod.pause" class="icon-red-inverse">pause</md-icon>
+                                    <md-icon ng-if="prod.trending >= 1" class="icon-crimson">trending_up</md-icon>
+                                    <md-icon ng-if="prod.trending > -1 && prod.trending < 1">trending_flat</md-icon>
+                                    <md-icon ng-if="prod.trending <= -1" class="icon-darkcyan">trending_down</md-icon>
+                                </td>
+                                <!-- Columnas -->
+                                <td ng-if="!prod.esModelo" class="presentacion" ng-repeat="colPres in columnasPres"  flex="{{ colPres.flex }}">{{ prod[colPres.id] }}</td>
+                                <!-- Boton ML -->
+                                <td ng-if="!prod.esModelo" class="presentacion" ng-repeat="accionPres in accionesPres" flex="5">
+                                    <md-button ng-click="accionPres.do(prod.prodID)" 
+                                                ng-disabled="accionPres.icon === 'link' && !prod.mlUrl" 
+                                                class="md-icon-button md-accent md-icon-button-compact">
+                                        <md-icon>{{ accionPres.icon }}</md-icon>
+                                    </md-button>
+                                </td>
+                            </tr>
+
+                            
+                            <!-- <tr class="collapse row1">
+                                <td>10</td>
+                                <td>Mike</td>
+                                <td>David</td>
+                                <td>mike@email.com</td>
+                                <td>Mike Company</td>
+                                <td><input type="checkbox" /> Select</td>
+                            </tr>
+                            <tr class="clickable" data-toggle="collapse" id="row2" data-target=".row2">
+                                <td>2</td>
+                                <td>Jackson</td>
+                                <td>Roomney</td>
+                                <td>jackson@email.com</td>
+                                <td>Jackson Company</td>
+                                <td><button class="btn btn-default btn-sm">View More</button></td>
+                            </tr>
+                            <tr class="collapse row2">
+                                <td>2</td>
+                                <td>Mike</td>
+                                <td>David</td>
+                                <td>mike@email.com</td>
+                                <td>Mike Company</td>
+                                <td><input type="checkbox" /> Select</td>
+                            </tr>
+                            <tr class="collapse row2">
+                                <td>2</td>
+                                <td>Mike</td>
+                                <td>David</td>
+                                <td>mike@email.com</td>
+                                <td>Mike Company</td>
+                                <td><input type="checkbox" /> Select</td>
+                            </tr> -->
+                        </tbody>
+                    </table>
+                </div>
+            </md-content>
+        </md-dialog-content>
+    </div>
+</md-dialog>
