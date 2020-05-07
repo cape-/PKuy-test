@@ -1,0 +1,21 @@
+{
+    "name": "PKuyApp - Gestión de Negocio",
+    "short_name": "PKuyApp",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#e91e63",
+    "theme_color": "#e91e63",
+    "icons": [
+        {
+            "src": "resources/img/pkuy-icon-4x.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "resources/img/pkuy-icon-512px.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ]
+}

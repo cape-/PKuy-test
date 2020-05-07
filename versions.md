@@ -10,14 +10,16 @@ Upgrades y mejoras para PkuyApp v1.1
     PkuyApp.getCabOfTable() debería implementar cache para todas las cabeceras de tabla (dato no variable) [LISTO]
 
 
-    # get AutoID del prod modelo
-    # INPUT para prodID
-    # INPUT para mlUrl
-    # UPLOAD imagenes [EN CURSO]
+    # get AutoID del prod modelo [LISTO]
+    # INPUT para prodID [LISTO]
+    # INPUT para mlUrl [LISTO]
+    # UPLOAD imagenes [LISTO]
     # tipo de precio modelo = costo ¿¿¿???
     # cargar precios [LISTO]
+
+
     # widgets de botones accesos rápidos a funciones corrientes (en pantalla principal)
-    # OCULTAR WIDGETS mientras PkuyLoading, luego hacerlos aparecer con un fade-in uno por uno con un defasaje de 100ms
+    # OCULTAR WIDGETS mientras PkuyLoading, luego hacerlos aparecer con un fade-in uno por uno con un defasaje de 100ms  [LISTO]
 
     BUGS
     # Revisar actualización de cotizaciones nuevas (cotización hoy 30/3 y en la db ultima registrada del 28/3)

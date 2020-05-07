@@ -13,40 +13,86 @@
         <md-dialog-content>
             <md-content layout-padding>
                 <div>
-                    <table>
+                    <div layout="row">
+                        <div flex="grow">
+                            <md-input-container>
+                                <label>Filtrar Productos...</label>
+                                <input type="text" ng-model="prodSearch" name="prodSearch" size="50">
+                            </md-input-container>
+                        </div>
+                        <div flex="auto">
+                            <h4>Creados o modificados</h4>
+                            <md-datepicker ng-model="prodTSdesde" md-placeholder="desde"></md-datepicker>
+                            <md-datepicker ng-model="prodTShasta" md-placeholder="hasta"></md-datepicker>
+                        </div>
+                    </div>
+                    <table class="maxTable">
                         <thead>
                             <tr layout="row" class="listadoProd">
-                                <th flex="5"></th>
-                                <th ng-repeat="col in columnas" flex="{{ col.flex }}">{{ col.title }}</th>
+                                <th class="prodModelo" flex="5"></th>
+                                <th class="prodModelo" flex="15"></th>
+                                <th ng-repeat="col in columnas" class="prodModelo" flex="{{ col.flex }}">{{ col.title }}
+                                </th>
                                 <!-- <th>MercadoLibre</th> -->
                             </tr>
                             <tr layout="row" class="listadoProd">
-                                <th flex="5" class="presentacion"></th>
-                                <th ng-repeat="colPres in columnasPres" class="presentacion" flex="{{ colPres.flex }}">{{ colPres.title }}</th>
-                                <th class="presentacion" colspan="{{ accionesPres.length }}">Acciones</th class="presentacion" >
+                                <th flex="20" class="presentacion"></th>
+                                <th ng-repeat="colPres in columnasPres" class="presentacion" flex="{{ colPres.flex }}">
+                                    {{ colPres.title }}</th>
+                                <th flex="{{ accionesPres.length * 5 }}" class="presentacion">Acciones</th
+                                    class="presentacion">
                             </tr>
-                        </thead>
                         <tbody>
-                            <tr ng-repeat="prod in productos" class="listadoProd" ng-init="prod.expanded = false" ng-click="togglePresentaciones(prod,$index)">
+                            </thead>
+                            <tr ng-repeat="prod in productos" class="listadoProd" ng-init="prod.expanded = false"
+                                ng-show="([prod] | filter:prodSearch).length > 0"
+                                ng-click="togglePresentaciones(prod,$index)">
                                 <!-- MODELO -->
                                 <!-- [+] / [-] -->
-                                <td ng-if="prod.esModelo && prod.expanded" class="prodModelo" flex="5"><md-icon>expand_more</md-icon></td>
-                                <td ng-if="prod.esModelo && !prod.expanded" class="prodModelo" flex="5"><md-icon class="icon-orange">chevron_right</md-icon></td>
-                                <td ng-if="prod.esModelo" class="prodModelo prodTags" flex="10">
-                                    <md-icon ng-if="prod.star" class="icon-yellow">star</md-icon>
-                                    <md-icon ng-if="prod.hot" class="icon-red">whatshot</md-icon>
-                                    <md-icon ng-if="prod.new" class="icon-lime">fiber_new</md-icon>
-                                    <md-icon ng-if="prod.pause" class="icon-red-inverse">pause</md-icon>
-                                    <md-icon ng-if="prod.trending >= 1" class="icon-crimson">trending_up</md-icon>
-                                    <md-icon ng-if="prod.trending > -1 && prod.trending < 1">trending_flat</md-icon>
-                                    <md-icon ng-if="prod.trending <= -1" class="icon-darkcyan">trending_down</md-icon>
+                                <td ng-if="prod.esModelo && prod.expanded" class="prodModelo" flex="5">
+                                    <md-icon>expand_more</md-icon>
+                                </td>
+                                <td ng-if="prod.esModelo && !prod.expanded" class="prodModelo" flex="5">
+                                    <md-icon class="icon-orange">chevron_right</md-icon>
+                                </td>
+                                <td ng-if="prod.esModelo" class="prodModelo prodTags" flex="15">
+                                    <span>
+                                        <md-icon ng-if="prod.star" class="icon-yellow">star</md-icon>
+                                        <md-tooltip>Producto Lider!</md-tooltip>
+                                    </span>
+                                    <span>
+                                        <md-icon ng-if="prod.hot" class="icon-red">whatshot</md-icon>
+                                        <md-tooltip>On Fire!</md-tooltip>
+                                    </span>
+                                    <span>
+                                        <md-icon ng-if="prod.new" class="icon-lime">fiber_new</md-icon>
+                                        <md-tooltip>Producto Nuevo</md-tooltip>
+                                    </span>
+                                    <span>
+                                        <md-icon ng-if="prod.pause" class="icon-red-inverse">pause</md-icon>
+                                        <md-tooltip>PUBLICACIÓN PAUSADA</md-tooltip>
+                                    </span>
+                                    <span>
+                                        <md-icon ng-if="prod.trending >= 1" class="icon-crimson">trending_up</md-icon>
+                                        <md-tooltip>Pedidos en alza</md-tooltip>
+                                    </span>
+                                    <span>
+                                        <md-icon ng-if="prod.trending > -1 && prod.trending < 1">trending_flat</md-icon>
+                                        <md-tooltip>Nivel de pedidos estable</md-tooltip>
+                                    </span>
+                                    <span>
+                                        <md-icon ng-if="prod.trending <= -1" class="icon-darkcyan">trending_down
+                                        </md-icon>
+                                        <md-tooltip>Pedidos en baja</md-tooltip>
+                                    </span>
                                 </td>
                                 <!-- Columnas -->
-                                <td ng-if="prod.esModelo" class="prodModelo" ng-repeat="col in columnas" flex="{{ col.flex }}">{{ prod[col.id] }}</td>
-                                
+                                <td ng-if="prod.esModelo" class="prodModelo" ng-repeat="col in columnas"
+                                    flex="{{ col.flex }}">{{ prod[col.id] }}</td>
+
                                 <!-- PRESENTACION -->
                                 <!-- > -->
-                                <td ng-if="!prod.esModelo" class="presentacion prodTags" flex="10">
+                                <td ng-if="!prod.esModelo" class="presentacion prodTags" flex="20">
                                     <md-icon ng-if="prod.star" class="icon-yellow">star</md-icon>
                                     <md-icon ng-if="prod.hot" class="icon-red">whatshot</md-icon>
                                     <md-icon ng-if="prod.new" class="icon-lime">fiber_new</md-icon>
@@ -56,18 +102,20 @@
                                     <md-icon ng-if="prod.trending <= -1" class="icon-darkcyan">trending_down</md-icon>
                                 </td>
                                 <!-- Columnas -->
-                                <td ng-if="!prod.esModelo" class="presentacion" ng-repeat="colPres in columnasPres"  flex="{{ colPres.flex }}">{{ prod[colPres.id] }}</td>
+                                <td ng-if="!prod.esModelo" class="presentacion" ng-repeat="colPres in columnasPres"
+                                    flex="{{ colPres.flex }}">{{ prod[colPres.id] }}</td>
                                 <!-- Boton ML -->
-                                <td ng-if="!prod.esModelo" class="presentacion" ng-repeat="accionPres in accionesPres" flex="5">
-                                    <md-button ng-click="accionPres.do(prod.prodID)" 
-                                                ng-disabled="accionPres.icon === 'link' && !prod.mlUrl" 
-                                                class="md-icon-button md-accent md-icon-button-compact">
+                                <td ng-if="!prod.esModelo" class="presentacion" ng-repeat="accionPres in accionesPres"
+                                    flex="initial">
+                                    <md-button ng-click="accionPres.do(prod.prodID)"
+                                        ng-disabled="accionPres.icon === 'link' && !prod.mlUrl"
+                                        class="md-icon-button md-accent md-icon-button-compact">
                                         <md-icon>{{ accionPres.icon }}</md-icon>
                                     </md-button>
                                 </td>
                             </tr>
 
-                            
+
                             <!-- <tr class="collapse row1">
                                 <td>10</td>
                                 <td>Mike</td>

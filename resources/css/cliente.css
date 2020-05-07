@@ -53,9 +53,8 @@ form {
   border-radius: 1px;
 }
 .md-button.md-icon-button-compact {
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-top: -6px;
+  padding: 0;
+  margin: -6px 0 0 0;
 }
 .md-button.md-icon-button-compact md-icon {
   font-size: large;
@@ -115,6 +114,7 @@ tr.listadoProd:hover > .presentacion {
 
 td.prodTags{
   text-align: right;
+  padding-right: 10px;
 }
 
 /* TODO: BORRAR */
@@ -300,33 +300,30 @@ div.md-input-message-animation {
   margin-bottom: 18px;
 }
 
-table {
-  table-layout: fixed;
+table.maxTable {
   width: 100%;
 }
-/* tbody{
-} */
-tr {
+table.maxTable tr {
   display: flex;
   flex-flow: row;
 }
-td,
-th {
+table.maxTable td, table.maxTable th {
   flex: 1 1 100px;
 }
-input,
-select {
+table.maxTable td input, table.maxTable td select {
   display: inline;
   width: 100%;
 }
+
 div.table-scroll-div {
   max-height: 135px;
   overflow: auto;
+  scrollbar-width: thin;
 }
 
-div.table-scroll-div::-webkit-scrollbar {
+/* div.table-scroll-div::-webkit-scrollbar {
   width: 2px;
-}
+} */
 
 .grilla-presentaciones-btn {
   min-height: 0em !important;

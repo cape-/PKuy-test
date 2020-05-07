@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
 	1.Instalar XAMPP
 	
-	2. Copiar PkuyApp ROOT
+	2.Copiar PkuyApp ROOT
 
 	3.Editar hosts (C:\Windows\System32\drivers\etc\hosts)
 	
@@ -17,6 +17,7 @@
 	
 		<VirtualHost *:80>
 			# Anular Dashboard y demás dominios de XAMPP
+			ServerName localhost
 			DocumentRoot /
 			<Directory />
 				AllowOverride none
@@ -26,20 +27,68 @@
 
 		<VirtualHost *:80>
 			ServerAdmin laucape@gmail.com
-			DocumentRoot "[\\\ RUTA A PKUYAPP ROOT \\\]"
+			DocumentRoot "C:/Users/Chasca Cirko/Documents/GitHub/PKuy-test"
 			ServerName www.pkuyapp.com
-			<Directory "[\\\ RUTA A PKUYAPP ROOT \\\]">
-				# AllowOverride All      # Deprecated
-				# Order Allow,Deny       # Deprecated
-				# Allow from all         # Deprecated
-
-				# --New way of doing it
+			<Directory "C:/Users/Chasca Cirko/Documents/GitHub/PKuy-test">
 				Require all granted
 			</Directory>
 		</VirtualHost>
 
-	5. Abrir XAMPP en [Modo Administrador] e instalar Apache como Servicio.
-	   Luego abrir "Servicios" (desde XAMPP), buscar Apache - Propiedades - Recovery - Setear "Restart Service" en todas las fallas
+		<VirtualHost *:443>
+			ServerAdmin laucape@gmail.com
+			DocumentRoot "C:/Users/Chasca Cirko/Documents/GitHub/PKuy-test"
+			ServerName www.pkuyapp.com
+			SSLEngine on
+			SSLCertificateFile "conf/ssl.crt/server.crt"
+			SSLCertificateKeyFile "conf/ssl.key/server.key"
+			<Directory "C:/Users/Chasca Cirko/Documents/GitHub/PKuy-test">
+				Require all granted
+			</Directory>
+		</VirtualHost>
 	
-	6. Abrir www.pkuyapp.com en Chrome e ir a "Opciones - Más Herramientas - Crear acceso directo".
+	5. Creación e Instalación de Certificado SSL.
+		5.1 Crear el archivo V3.ext en C:\xampp\apache\ con el siguiente contenido:
+				
+				subjectAltName = @alt_names
+				[alt_names]
+				DNS.1 =localhost
+				DNS.2 =*.pkuyapp.com
+				DNS.3 =pkuyapp.com
+				DNS.4 =127.0.0.1
+				
+		5.2 Modificar C:\apache\makecert.bat línea 9 cambiar:
+		
+				bin\openssl x509 -in server.csr -out server.crt -req -signkey server.key -days 365
+				
+			por:
+			
+				bin\openssl x509 -in server.csr -out server.crt -req -signkey server.key -days 365 -extfile v3.ext
+				
+
+		5.3 Abrir PowerShell y correr C:\apache\makecert.bat 
+			5.3.a Usar una passphrase cualquiera y completar los datos requeridos.
+			5.3.b En "Common Name (e.g. server FQDN or YOUR name) []:" completar con "pkuyapp"
+			5.3.c No es necesario crear un "challenge password[]:"
+			5.3.d Si todo sale bien debe imprimirse "The certificate was provided."
+		
+		5.3 Importar certificado. (2 maneras)
+			5.3.1 Via Chrome.
+				5.3.1.a Abrir Chrome > Configuración > Buscar "Cerfiticados" > Mas > Administrar Cerfiticados
+				5.3.1.b Click en boton "Import" > Next > File name: C:\xampp\apache\conf\ssl.crt\server.crt > Next > Browse... > "Trusted Root Certification	Authorities" > Next > Finish
+				5.3.1.c En prompt de confirmación click en "Yes"
+				5.3.1.d Si salió todo ok debería alertar "The import was successful."
+				
+			5.3.2 Vía Windows
+				5.3.2.a Win+R > mmc > Yes (en el diálogo)
+				5.3.2.b File > Add/Remove Snap-In > Certificates (doble click) > My user account > Finish > Ok
+				5.3.2.c Abrir el arbol de "Certificates - Current User" > "Trusted Root Certification Authorities" 
+				5.3.2.d Click con el boton derecho en "Trusted Root Certification Authorities" > All Tasks > Import
+				5.3.2.e Proceder igual que en 5.3.1.b
+				
+		5.4 Reiniciar Chrome/Firefox
+
+	6. Abrir XAMPP en [Modo Administrador] e instalar Apache como Servicio.
+	   Luego abrir "Servicios" (desde XAMPP), buscar Apache > Propiedades > Recovery > Setear "Restart Service" en todas las fallas
+	
+	7. Abrir https://www.pkuyapp.com en Chrome e ir a "Opciones - Más Herramientas - Crear acceso directo".
 	   Luego renombrar el acceso directo creado en el Escritorio como "PkuyApp".

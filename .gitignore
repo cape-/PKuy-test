@@ -1,7 +1,11 @@
-/keys/pkuyApp_keys.js
-/keys/mongodbAtlasKeys.txt
-/keys/gapi_sheets_responses_examples.json
-dolar_apis.txt
+keys/pkuyApp_keys.js
+.revisar/mongodbAtlasKeys.txt
+.revisar/gapi_sheets_responses_examples.json
+.revisar/dolar_apis.txt
+.revisar/gsheets_api_js-test.html
+.revisar/maquetado-boceto.html
+.revisar/meli_api_js-test.html
+.revisar/pkuyapp-ng-integration.html
 libs/chartjs/chart.js
 libs/webdatarocks/index.html
 libs/webdatarocks/webdatarocks.css

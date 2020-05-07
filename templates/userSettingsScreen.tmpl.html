@@ -1,0 +1,70 @@
+<md-dialog flex="50">
+    <div layout="column" ng-cloak>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Seteos del Usuario</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+                    <md-icon aria-label="Close dialog">close</md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+
+        <md-dialog-content>
+            <md-content layout="row" layout-padding="">
+                <div>
+                    <p>
+                        <i class="material-icons icon-big">settings</i>
+                    </p>
+                </div>
+                <div>
+                    <h2><strong>Opciones de PkuyApp</strong></h2>
+                    <p>Usuario: {{ settings.currentUser.nombreCompleto }}</p>
+                    <div layout="row">
+                        <div flex="50">
+                            <md-switch class="md-primary" ng-model="settings.fullscreen" aria-label="Switch 1">
+                                Usar Pantalla Completa: <strong>{{ settings.fullscreen? 'Si' : 'No' }}</strong>
+                            </md-switch>
+                            <md-switch ng-model="settings.cosa2" ng-disabled="!settings.fullscreen" aria-label="Switch 2">
+                                Switch 2
+                            </md-switch>
+                            <md-switch ng-model="settings.cosa3" ng-disabled="settings.fullscreen"  aria-label="Switch 1">
+                                Switch 333333
+                            </md-switch>
+                            <md-switch ng-model="settings.cosa4"ng-disabled="settings.fullscreen"  aria-label="Switch 1">
+                                Switch 4444 44444444
+                            </md-switch>
+                            <md-switch ng-model="settings.cosa5" aria-label="Switch 1">
+                                Switch 5
+                            </md-switch>        
+                        </div>
+                        <div flex="50">
+                            <md-switch class="md-primary" ng-model="settings.fullscreen" aria-label="Switch 1">
+                                Usar Pantalla Completa: <strong>{{ settings.fullscreen? 'Si' : 'No' }}</strong>
+                            </md-switch>
+                            <md-switch ng-model="settings.cosa2" ng-disabled="!settings.fullscreen" aria-label="Switch 2">
+                                Switch 2
+                            </md-switch>
+                            <md-switch ng-model="settings.cosa3" ng-disabled="settings.fullscreen"  aria-label="Switch 1">
+                                Switch 333333
+                            </md-switch>
+                            <md-switch ng-model="settings.cosa4" ng-disabled="settings.fullscreen" aria-label="Switch 1">
+                                Switch 4444 44444444
+                            </md-switch>
+                            <md-switch ng-model="settings.cosa5" aria-label="Switch 1">
+                                Switch 5
+                            </md-switch>        
+                        </div>
+                    </div>
+                </div>
+            </md-content>
+            <md-dialog-actions layout="row">
+                <span flex></span>
+                <md-button class="" type="button" ng-click="cancel()">
+                    <md-icon>done</md-icon> Cerrar
+                </md-button>
+                <span flex></span>
+            </md-dialog-actions>
+        </md-dialog-content>
+    </div>
+</md-dialog

@@ -94,7 +94,7 @@
                             </md-button>
                         </div>
                         <div layout-gt-sm="column" ng-if="presentaciones.length == 0">
-                            <table>
+                            <table class="maxTable">
                                 <thead>
                                     <tr>
                                         <th>Complete los datos del Producto y luego haga clic en + para agregar
@@ -104,7 +104,7 @@
                             </table>
                         </div>
                         <div layout-gt-sm="column" ng-if="presentaciones.length > 0">
-                            <table flex-gt-sm>
+                            <table flex-gt-sm class="maxTable">
                                 <thead>
                                     <tr layout-gt-sm="row">
                                         <th flex-gt-sm="25"><label>Denominacion</label></th>
@@ -118,7 +118,7 @@
                                 </thead>
                             </table>
                             <div class="table-scroll-div">
-                                <table flex-gt-sm>
+                                <table flex-gt-sm class="maxTable">
                                     <tbody>
                                         <tr layout-gt-sm="row" ng-repeat="presentacion in presentaciones">
                                             <td flex-gt-sm="25">

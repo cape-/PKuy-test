@@ -1,6 +1,6 @@
 angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
 
-  .config(function ($mdThemingProvider) {
+  .config(function ($mdThemingProvider, $mdDateLocaleProvider) {
     $mdThemingProvider.theme('default')
       .primaryPalette('pink')
       .accentPalette('yellow')
@@ -10,6 +10,30 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
       .primaryPalette('orange')
       .accentPalette('brown');
     // .dark();
+
+    $mdDateLocaleProvider.months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    $mdDateLocaleProvider.shortMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    $mdDateLocaleProvider.days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    $mdDateLocaleProvider.shortDays = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
+    $mdDateLocaleProvider.firstDayOfWeek = 1;
+    $mdDateLocaleProvider.parseDate = function (s) {
+      [dia, mes, anio] = s.split(' ')[1].split('/');
+      // [hora, min, seg] = s.split(' ')[2].split(':');
+      var d = new Date();
+      d.setFullYear(anio, --mes, dia);
+      // d.setHours(hora, min, seg);
+      return d;
+    };
+    $mdDateLocaleProvider.formatDate = function (date) {
+      var s = $mdDateLocaleProvider.days[date.getDay()]
+        + ' ' + date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+      // + ' ' +  d.getHours() + ':' + (d.getMinutes() + 1) + ':' + d.getSeconds();
+      return s;
+    };
+    $mdDateLocaleProvider.monthHeaderFormatter = (date) => { return $mdDateLocaleProvider.shortMonths[date.getMonth()] + ' ' + date.getFullYear() };
+    $mdDateLocaleProvider.weekNumberFormatter = (weekNumber) => { return 'Semana ' + weekNumber };
+    $mdDateLocaleProvider.msgCalendar = 'Calendario';
+    $mdDateLocaleProvider.msgOpenCalendar = 'Abrir calendario';
   })
 
   .factory('PkuyLink', function () {
@@ -164,11 +188,7 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
         targetEvent: ev,
         clickOutsideToClose: true,
         fullscreen: false
-      })
-        .then(function (answer) {
-        })
-        .catch(function () {
-        });
+      });
 
     }
 
@@ -180,6 +200,21 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
         autoWrap: false,
         parent: angular.element(document.body),
         templateUrl: 'templates/offlineScreen.tmpl.html'
+      })
+    }
+
+    $scope.userSettingsScreen = function (reload) {
+
+      $mdDialog.show({
+        controller: 'dialogUserSettings',
+        templateUrl: 'templates/userSettingsScreen.tmpl.html',
+        parent: angular.element(document.body),
+        clickOutsideToClose: true,
+        fullscreen: false,
+        autoWrap: false,
+      }).then(function () {
+        if (reload === true)
+          window.location.reload();
       })
     }
 
@@ -223,21 +258,35 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
       {
         titulo: 'X . Admin',
         entradas: [
-          { titulo: 'Borrar localStorage', do: function () { localStorage.clear() } },
+          { titulo: 'Configuración', do: function () { $scope.userSettingsScreen() } },
+          // TODO: Poner línea divisoria
+          { titulo: 'Borrar localStorage', do: function () { localStorage.clear() } }, // TODO: modularizar en una fn y hacer prompt de confirmacion
           { titulo: 'Abrir PkuyDB', do: function () { window.open("https://docs.google.com/spreadsheets/d/" + PkuyLink.dbSpreadsheet) } },
           { titulo: 'BackUp PkuyDB', do: function () { PkuyLink.backupPkuyDB() } }
         ]
       }
     ];
 
-    // TODO: Activar notificaciones.
-    // // Permiso para Notifiaciones
-    // Notification.requestPermission();
+    // Permiso para Notifiaciones
+    Notification.requestPermission();
+    Notification.onclick = function () { console.debug(params) };
+
+
+    // Recuperar Settings de usuario 
+    $rootScope.userSettings = JSON.parse(localStorage.getItem('pkUserSettings'));
+
+    // Iniciar Pantalla Completa
+    if ($rootScope.userSettings && 'fullscreen' in $rootScope.userSettings)
+      document.body.requestFullscreen();
 
     // StartUp
     if (navigator.onLine) {
-      $rootScope.lo();
-      PkuyLink.startPkuyDB($scope.onDBLoaded, $scope.onCotizacionesLoaded, $http);
+      if ($rootScope.userSettings) {
+        $rootScope.lo();
+        PkuyLink.startPkuyDB($scope.onDBLoaded, $scope.onCotizacionesLoaded, $http);
+      } else {
+        $scope.userSettingsScreen(true);
+      }
     } else {
       $scope.offlineScreen();
     }
@@ -842,12 +891,12 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
     // rowRange: "prod_01!A6:ZZ6"
     // usuario: "maurooris"
     $scope.columnas = [
-      { title: "Producto", id: "descripcion", flex: "" },
-      { title: "Orígen", id: "origen", flex: "" },
-      { title: "Unidad", id: "UM", flex: "" },
+      { title: "Producto", id: "descripcion", flex: "grow" },
+      { title: "Orígen", id: "origen", flex: "15" },
+      { title: "U/M", id: "UM", flex: "5" },
     ];
     $scope.columnasPres = [
-      { title: "Presentación", id: "descripcion", flex: "" },
+      { title: "Presentación", id: "descripcion", flex: "grow" },
       { title: "Cant.", id: "cantPresentacion", flex: "10" },
       { title: "Unidad", id: "UM", flex: "10" },
     ];
@@ -880,6 +929,24 @@ angular.module('PkuyApp', ['ngMaterial', 'ngAnimate'])
     };
 
     updateProdTags();
+
+  })
+
+  .controller('dialogUserSettings', function ($scope, PkuyLink, $timeout, $rootScope, $mdDialog) {
+    /** Cerrar Diálogo */
+    $scope.cancel = () => $mdDialog.cancel();
+
+    $scope.settings = $rootScope.userSettings || {
+      currentUser: $rootScope.currentUser,
+      fullscreen: true
+    }
+
+    $scope.$watchCollection('settings', (despues, antes) => {
+      despues.currentUser = $rootScope.currentUser;
+      despues.ts = Date.now();
+      localStorage.setItem('pkUserSettings', JSON.stringify(despues));
+      $rootScope.userSettings = despues;
+    })
 
   })
 

@@ -50,7 +50,8 @@ var PkuyApp = {
   },
 
   // Otros Params
-  icon: "pkuy-icon-1x.png",
+  icon: "resources/img/pkuy-icon-1x.png",
+  iconBig: "resources/img/pkuy-icon-400px.png",
   descuentos: ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90"],
 
 
@@ -171,7 +172,7 @@ var PkuyApp = {
 
     var initProm = new Promise(function (resolve, reject) {
       gapi.client.init(PkuyApp.gapiClientParams)
-        .then(resolve,reject);
+        .then(resolve, reject);
     });
 
     initProm.catch((error) => PkuyApp.error('Error en gapi.client.init! ' + JSON.stringify(error, null, 2)))
@@ -220,6 +221,7 @@ var PkuyApp = {
 
         // Inicializar DB desde la data recolectada
         PkuyApp.initPkuyDB(localStorageDB);
+        PkuyApp.db.ts = localStorageDB.ts;
 
         await PROMuserData;
 
@@ -858,8 +860,8 @@ var PkuyApp = {
     /*------------------------------------------------------------------*/
     /*  Notificar */
     PkuyApp.notificacion('Cliente Creado', false, 'El Cliente ' + nuevoCliente.cliID
-      + ' (' + nuevoCliente.nombre + ' ' + nuevoCliente.apellido + ') ha sido creado correctamente!\n'
-      + 'Su dirección es la número ' + nuevoCliente.dirID + '.');
+      + ' (' + nuevoCliente.nombreCliente() + ') ha sido creado correctamente\n'
+      + 'con dirección nro. ' + nuevoCliente.dirID + '.');
     PkuyApp.log('Cliente Nro.' + nuevoCliente.cliID + ' creado con dirección ' + nuevoCliente.dirID);
     return nuevoCliente;
 
@@ -934,7 +936,7 @@ var PkuyApp = {
 
     /*------------------------------------------------------------------*/
     /*  Notificar */
-    PkuyApp.notificacion('Cotización registrada', false, 'Cotización de ' + nuevaCotizacion.monedaDe + ' a ' + nuevaCotizacion.monedaA + ' registrada correctamente');
+    // PkuyApp.notificacion('Cotización registrada', false, 'Cotización de ' + nuevaCotizacion.monedaDe + ' a ' + nuevaCotizacion.monedaA + ' registrada correctamente');
     PkuyApp.log('Cotización de ' + nuevaCotizacion.monedaDe + ' a ' + nuevaCotizacion.monedaA + ' registrada correctamente');
     return nuevaCotizacion;
 
@@ -963,7 +965,7 @@ var PkuyApp = {
 
     /*------------------------------------------------------------------*/
     /*  Notificar */
-    PkuyApp.notificacion('Precio registrado', false, 'Precio ' + nuevoPrecio.tipoPrecio + ' para el producto ' + nuevoPrecio.prodID + ' registrado correctamente');
+    // PkuyApp.notificacion('Precio registrado', false, 'Precio ' + nuevoPrecio.tipoPrecio + ' para el producto ' + nuevoPrecio.prodID + ' registrado correctamente');
     PkuyApp.log('Precio ' + nuevoPrecio.tipoPrecio + ' para el producto ' + nuevoPrecio.prodID + ' registrado correctamente');
     return nuevoPrecio;
 
@@ -1122,12 +1124,19 @@ var PkuyApp = {
   },
 
   notificacion: async function (titulo, esperarCierre, cuerpo) {
-    console.debug("notificacion");
-    new Notification(titulo, {
+    var n = new Notification(titulo, {
       "body": cuerpo,
       "tag": "PkuyNotif_" + PkuyApp.upTime(),
-      "icon": PkuyApp.icon,
+      "icon": PkuyApp.iconBig,
+      // "image": PkuyApp.iconBig,
+      "data": '->' + cuerpo,
       "renotify": 'false',
+      actions: [
+        {
+          action: 'archive',
+          title: 'Archivar'
+        }
+      ],
       "requireInteraction": esperarCierre ? 'true' : 'false'
     });
   },
@@ -1150,3 +1159,20 @@ if (typeof PkuyAppKeys === 'undefined')
 else
   Object.assign(PkuyApp, PkuyAppKeys);
 
+// Register service worker: PkuyApp Offline 
+// if ('serviceWorker' in navigator) {
+//   navigator.serviceWorker
+//     .register('sw.js')
+//     .then(function (reg) { console.debug('Service Worker Registered :', reg); });
+// }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+      // Registration was successful
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, function(err) {
+      // registration failed :(
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
